@@ -147,7 +147,8 @@ export default function VoiceRecorder({ onSubmit, isSubmitting }) {
 
   const handleSubmit = useCallback(async () => {
     if (!audioBlobRef.current) return
-    await onSubmit(audioBlobRef.current, mimeTypeRef.current)
+    const cleanType = (mimeTypeRef.current || 'audio/webm').split(';')[0].trim()
+    await onSubmit(audioBlobRef.current, cleanType)
   }, [onSubmit])
 
   return (

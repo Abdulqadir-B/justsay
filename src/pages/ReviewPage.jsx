@@ -59,7 +59,16 @@ export default function ReviewPage() {
       })
 
       if (error || !data?.success) {
-        throw new Error(data?.error || error?.message || 'Failed to submit review')
+        let errorMsg = data?.error || error?.message
+        if (error && error.context) {
+          try {
+            const errBody = await error.context.json()
+            if (errBody?.error) errorMsg = errBody.error
+          } catch {
+            // ignore
+          }
+        }
+        throw new Error(errorMsg || 'Failed to submit review')
       }
 
       setSubmitted(true)

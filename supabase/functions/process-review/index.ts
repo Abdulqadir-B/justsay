@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.21.0'
 
@@ -38,12 +39,41 @@ async function analyzeAudio(audioBase64, mimeType) {
   if (!apiKey) throw new Error('GEMINI_API_KEY is not configured')
 
   const genAI = new GoogleGenerativeAI(apiKey)
-  const MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest']
-  const audioPart = { inlineData: { data: audioBase64, mimeType } }
+  const cleanMimeType = (mimeType || 'audio/webm').split(';')[0].trim()
+  const audioPart = { inlineData: { data: audioBase64, mimeType: cleanMimeType } }
+
+  let modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest']
+
+  try {
+    const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`)
+    const listData = await listRes.json()
+    if (listData?.models && Array.isArray(listData.models)) {
+      const activeGenModels = listData.models
+        .filter((m) => {
+          const name = (m.name || '').toLowerCase()
+          return (
+            m.supportedGenerationMethods?.includes('generateContent') &&
+            !name.includes('tts') &&
+            !name.includes('embed') &&
+            !name.includes('imagen')
+          )
+        })
+        .map((m) => m.name.replace('models/', ''))
+
+      if (activeGenModels.length > 0) {
+        const preferred = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro', 'gemini-2.0-flash-exp']
+        const matched = preferred.filter((p) => activeGenModels.includes(p))
+        const remaining = activeGenModels.filter((m) => !matched.includes(m))
+        modelsToTry = [...matched, ...remaining]
+      }
+    }
+  } catch (err) {
+    console.warn('Could not list models, using fallback list:', err)
+  }
 
   let lastError = null
 
-  for (const modelName of MODELS) {
+  for (const modelName of modelsToTry) {
     try {
       const model = genAI.getGenerativeModel({ model: modelName })
       const result = await model.generateContent([ANALYSIS_PROMPT, audioPart])
@@ -59,26 +89,25 @@ async function analyzeAudio(audioBase64, mimeType) {
       const msg = error?.message ?? ''
       const isQuota = msg.includes('429') || msg.includes('quota')
       const isNotFound = msg.includes('404') || msg.includes('not found')
-      if (!isQuota && !isNotFound) break
+      const isModality = msg.includes('modality') || msg.includes('Audio input')
+      if (!isQuota && !isNotFound && !isModality) break
     }
   }
 
   throw lastError ?? new Error('Gemini analysis failed — all models exhausted')
 }
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
-    })
+    return new Response('ok', { headers: corsHeaders })
   }
-
-  const corsHeaders = { 'Access-Control-Allow-Origin': '*' }
 
   try {
     const body = await req.json()
@@ -115,8 +144,9 @@ Deno.serve(async (req) => {
     try {
       analysisResult = await analyzeAudio(audioBase64, mimeType)
     } catch (error) {
+      console.error('AI processing failed:', error)
       return Response.json(
-        { success: false, error: `AI processing failed: ${error?.message}` },
+        { success: false, error: `AI processing failed: ${error?.message || error}` },
         { status: 502, headers: corsHeaders }
       )
     }
