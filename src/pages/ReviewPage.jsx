@@ -22,7 +22,7 @@ export default function ReviewPage() {
           .from('businesses')
           .select('name')
           .eq('id', businessId)
-          .single()
+          .maybeSingle()
 
         if (error || !data) {
           setNotFound(true)

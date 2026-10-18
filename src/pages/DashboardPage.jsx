@@ -173,9 +173,13 @@ export default function DashboardPage() {
           .from('businesses')
           .select('*')
           .eq('owner_email', user.email)
-          .single()
+          .maybeSingle()
 
-        if (bizError || !bizData) {
+        if (bizError) {
+          console.error('Error fetching business:', bizError)
+        }
+
+        if (!bizData) {
           setNoBusinessFound(true)
           setLoading(false)
           return

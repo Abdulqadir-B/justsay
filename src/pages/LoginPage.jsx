@@ -39,18 +39,33 @@ export default function LoginPage() {
 
     try {
       const supabase = createClient()
+      const cleanEmail = email.trim().toLowerCase()
 
       if (mode === 'signin') {
-        const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
+        const { error: authError } = await supabase.auth.signInWithPassword({ email: cleanEmail, password })
         if (authError) { setError(authError.message); return }
         navigate('/dashboard')
       } else {
-        const { error: authError } = await supabase.auth.signUp({ email, password })
+        const { data, error: authError } = await supabase.auth.signUp({ email: cleanEmail, password })
         if (authError) { setError(authError.message); return }
+
+        // If email confirmation is disabled or auto-confirmed, session is immediately active
+        if (data?.session) {
+          navigate('/dashboard')
+          return
+        }
+
+        // Supabase returns an empty identities list if user already exists
+        if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+          setError('An account with this email already exists. Please switch to Sign In.')
+          return
+        }
+
         setSignUpSuccess(true)
       }
-    } catch {
-      setError('An unexpected error occurred. Please try again.')
+    } catch (err) {
+      console.error('Authentication error:', err)
+      setError(err?.message || 'An unexpected error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
