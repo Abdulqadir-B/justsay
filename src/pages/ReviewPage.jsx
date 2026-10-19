@@ -182,7 +182,7 @@ export default function ReviewPage() {
               Leave a voice review for <span className="text-zinc-100 underline decoration-zinc-700 underline-offset-4">{businessName}</span>
             </h1>
             <p className="text-xs text-zinc-400">
-              Tap the microphone and speak for up to 5 seconds.
+              Tap the microphone and speak for up to 15 seconds.
             </p>
           </div>
 
@@ -200,7 +200,7 @@ export default function ReviewPage() {
                 <span className="text-zinc-700">&bull;</span>
                 <span className="flex items-center gap-1">
                   <span className="flex h-4 w-4 items-center justify-center rounded-full bg-zinc-800 text-[10px] font-mono text-zinc-300">2</span>
-                  Speak 5s
+                  Speak (up to 15s)
                 </span>
                 <span className="text-zinc-700">&bull;</span>
                 <span className="flex items-center gap-1">
@@ -226,11 +226,8 @@ export default function ReviewPage() {
           )}
 
           {/* Clean Footer Navigation */}
-          <div className="flex items-center justify-between w-full pt-4 border-t border-zinc-900 text-xs text-zinc-600">
+          <div className="flex items-center justify-center w-full pt-4 border-t border-zinc-900 text-xs text-zinc-600">
             <span>Powered by <span className="text-zinc-500 font-medium">JustSay</span></span>
-            <Link to="/dashboard" className="hover:text-zinc-400 transition-colors">
-              Business Portal &rarr;
-            </Link>
           </div>
         </div>
       </main>

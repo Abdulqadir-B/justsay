@@ -1,9 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { Mic, Square, Play, Pause, RotateCcw, Send, Loader2, Volume2 } from 'lucide-react'
 
+const MAX_RECORDING_SECONDS = 15
+
 export default function VoiceRecorder({ onSubmit, isSubmitting }) {
   const [state, setState] = useState('idle') // 'idle' | 'recording' | 'recorded'
-  const [countdown, setCountdown] = useState(5)
+  const [countdown, setCountdown] = useState(MAX_RECORDING_SECONDS)
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackTime, setPlaybackTime] = useState(0)
   const [audioDuration, setAudioDuration] = useState(0)
@@ -148,15 +150,15 @@ export default function VoiceRecorder({ onSubmit, isSubmitting }) {
         // Measure audio duration
         const tempAudio = new Audio(URL.createObjectURL(blob))
         tempAudio.onloadedmetadata = () => {
-          setAudioDuration(tempAudio.duration || 5)
+          setAudioDuration(tempAudio.duration || MAX_RECORDING_SECONDS)
         }
       }
 
       mediaRecorder.start()
       setState('recording')
-      setCountdown(5)
+      setCountdown(MAX_RECORDING_SECONDS)
 
-      let remaining = 5
+      let remaining = MAX_RECORDING_SECONDS
       countdownIntervalRef.current = setInterval(() => {
         remaining -= 1
         setCountdown(remaining)
@@ -169,7 +171,7 @@ export default function VoiceRecorder({ onSubmit, isSubmitting }) {
 
       recordingTimeoutRef.current = setTimeout(() => {
         stopRecording()
-      }, 5000)
+      }, MAX_RECORDING_SECONDS * 1000)
     } catch {
       setError('Microphone access denied. Please enable microphone permissions in your browser to record.')
       setState('idle')
@@ -213,7 +215,7 @@ export default function VoiceRecorder({ onSubmit, isSubmitting }) {
     setPlaybackTime(0)
     setAudioDuration(0)
     setState('idle')
-    setCountdown(5)
+    setCountdown(MAX_RECORDING_SECONDS)
   }, [])
 
   const handleSubmit = useCallback(async () => {
@@ -241,7 +243,7 @@ export default function VoiceRecorder({ onSubmit, isSubmitting }) {
 
           <div className="text-center">
             <p className="text-sm font-medium text-white">Tap to Start Recording</p>
-            <p className="text-xs text-zinc-400 mt-0.5">Speak naturally for up to 5 seconds</p>
+            <p className="text-xs text-zinc-400 mt-0.5">Speak naturally for up to 15 seconds</p>
           </div>
         </div>
       )}
@@ -249,13 +251,14 @@ export default function VoiceRecorder({ onSubmit, isSubmitting }) {
       {/* ─── STATE 2: RECORDING ─── */}
       {state === 'recording' && (
         <div className="flex flex-col items-center gap-5 w-full max-w-xs animate-fade-in">
-          {/* Stop Button */}
+          {/* Finish Button */}
           <button
             onClick={stopRecording}
-            aria-label="Stop recording"
-            className="flex h-20 w-20 items-center justify-center rounded-full bg-rose-600 text-white transition-all hover:bg-rose-500 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 focus:ring-offset-zinc-950 shadow-md cursor-pointer"
+            aria-label="Finish recording"
+            className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-full bg-rose-600 text-white transition-all hover:bg-rose-500 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 focus:ring-offset-zinc-950 shadow-md cursor-pointer"
           >
-            <Square className="h-6 w-6 fill-current" />
+            <Square className="h-5 w-5 fill-current" />
+            <span className="text-[10px] font-semibold tracking-wide uppercase">Finish</span>
           </button>
 
           {/* Countdown & Status */}
@@ -263,7 +266,7 @@ export default function VoiceRecorder({ onSubmit, isSubmitting }) {
             <span className="text-3xl font-semibold tabular-nums text-white">
               {countdown}s
             </span>
-            <p className="text-xs text-zinc-400 mt-0.5">Recording audio...</p>
+            <p className="text-xs text-zinc-400 mt-0.5">Tap Finish when done speaking</p>
           </div>
 
           {/* Real-time Voice Amplitude Waveform */}
@@ -299,7 +302,7 @@ export default function VoiceRecorder({ onSubmit, isSubmitting }) {
                 <span className="font-medium">Audio Preview</span>
               </div>
               <span className="text-xs font-mono text-zinc-400">
-                {playbackTime.toFixed(1)}s / {(audioDuration || 5).toFixed(1)}s
+                {playbackTime.toFixed(1)}s / {(audioDuration || MAX_RECORDING_SECONDS).toFixed(1)}s
               </span>
             </div>
 

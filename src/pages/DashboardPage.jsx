@@ -688,7 +688,7 @@ export default function DashboardPage() {
                 Tips for Collecting Voice Reviews
               </h4>
               <ul className="text-xs text-zinc-400 space-y-1.5 list-disc list-inside">
-                <li>Tell customers it only takes 5 seconds: <em>&ldquo;Just tap and say what you enjoyed!&rdquo;</em></li>
+                <li>Tell customers it only takes a few seconds: <em>&ldquo;Just tap and say what you enjoyed!&rdquo;</em></li>
                 <li>Voice reviews reduce friction by 80% compared to typing long forms.</li>
                 <li>Sentiment and key highlights will automatically populate in your dashboard in real-time.</li>
               </ul>

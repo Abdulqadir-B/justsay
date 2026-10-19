@@ -1,4 +1,4 @@
-import { AudioLines, LogOut, ExternalLink, LayoutDashboard, MessageSquare, QrCode } from 'lucide-react'
+import { AudioLines, LogOut, LayoutDashboard, MessageSquare, QrCode } from 'lucide-react'
 
 export default function Navbar({
   business,
@@ -8,7 +8,6 @@ export default function Navbar({
   reviewCount = 0,
   onLogout,
 }) {
-  const reviewUrl = business ? `/review/${business.id}?preview=true` : ''
 
   return (
     <header className="sticky top-0 z-40 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md">
@@ -89,35 +88,20 @@ export default function Navbar({
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2">
-          {business && (
-            <a
-              href={reviewUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Open customer review page in preview mode"
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
-            >
-              <ExternalLink className="h-3.5 w-3.5 text-zinc-400" />
-              <span>Test Customer View</span>
-            </a>
+          {userEmail && (
+            <span className="hidden md:inline text-xs text-zinc-500 max-w-[150px] truncate" title={userEmail}>
+              {userEmail}
+            </span>
           )}
-
-          <div className="flex items-center gap-2 pl-2 border-l border-zinc-800/80">
-            {userEmail && (
-              <span className="hidden md:inline text-xs text-zinc-500 max-w-[130px] truncate" title={userEmail}>
-                {userEmail}
-              </span>
-            )}
-            <button
-              onClick={onLogout}
-              aria-label="Sign out"
-              title="Sign out"
-              className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 px-2.5 py-1.5 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Sign Out</span>
-            </button>
-          </div>
+          <button
+            onClick={onLogout}
+            aria-label="Sign out"
+            title="Sign out"
+            className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 px-2.5 py-1.5 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Sign Out</span>
+          </button>
         </div>
 
       </div>
