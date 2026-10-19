@@ -4,7 +4,7 @@ import { createClient } from '../lib/supabase.js'
 import {
   AudioLines, MessageSquare, TrendingUp, Star,
   Loader2, Link as LinkIcon, Copy, Check, ExternalLink,
-  Search, Filter, QrCode, Download, Share2
+  Search, X, ArrowUpDown, QrCode, Download
 } from 'lucide-react'
 import Navbar from '../components/Navbar.jsx'
 import StatCard from '../components/StatCard.jsx'
@@ -38,16 +38,34 @@ function getReviewsPerDay(reviews) {
 
 function calculateStats(reviews) {
   if (reviews.length === 0) {
-    return { totalReviews: 0, averageSentimentScore: 0, averageStarRating: 0 }
+    return {
+      totalReviews: 0,
+      averageSentimentScore: 0,
+      averageStarRating: 0,
+      positiveCount: 0,
+      neutralCount: 0,
+      negativeCount: 0,
+    }
   }
 
   const totalReviews = reviews.length
+  const positiveCount = reviews.filter((r) => r.sentiment === 'positive').length
+  const neutralCount = reviews.filter((r) => r.sentiment === 'neutral').length
+  const negativeCount = reviews.filter((r) => r.sentiment === 'negative').length
+
   const averageSentimentScore =
     reviews.reduce((sum, r) => sum + (r.sentiment_score ?? 0), 0) / totalReviews
   const averageStarRating =
     reviews.reduce((sum, r) => sum + (r.star_rating ?? 0), 0) / totalReviews
 
-  return { totalReviews, averageSentimentScore, averageStarRating }
+  return {
+    totalReviews,
+    averageSentimentScore,
+    averageStarRating,
+    positiveCount,
+    neutralCount,
+    negativeCount,
+  }
 }
 
 function CustomTooltip({ active, payload, label }) {
@@ -100,7 +118,7 @@ function OnboardingCard({ userEmail, onCreated }) {
           </div>
           <div className="text-center">
             <h1 className="text-xl font-semibold tracking-tight text-white">Welcome to JustSay</h1>
-            <p className="mt-1 text-xs text-zinc-400">Set up your business name to generate your review link.</p>
+            <p className="mt-1 text-xs text-zinc-400">Set up your business name to start collecting voice reviews.</p>
           </div>
         </div>
 
@@ -162,6 +180,7 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview') // 'overview' | 'reviews' | 'share'
   const [reviewSearch, setReviewSearch] = useState('')
   const [sentimentFilter, setSentimentFilter] = useState('all') // 'all' | 'positive' | 'neutral' | 'negative'
+  const [sortBy, setSortBy] = useState('newest') // 'newest' | 'highest_rating' | 'lowest_rating' | 'highest_sentiment'
 
   useEffect(() => {
     async function fetchData() {
@@ -198,7 +217,7 @@ export default function DashboardPage() {
           .select('*')
           .eq('business_id', bizData.id)
           .order('created_at', { ascending: false })
-          .limit(50)
+          .limit(100)
 
         setReviews(reviewsData ?? [])
       } catch {
@@ -223,6 +242,7 @@ export default function DashboardPage() {
 
   const stats = useMemo(() => calculateStats(reviews), [reviews])
   const chartData = useMemo(() => getReviewsPerDay(reviews), [reviews])
+  const totalWeeklyReviews = useMemo(() => chartData.reduce((sum, d) => sum + d.reviews, 0), [chartData])
 
   const reviewUrl = business
     ? `${window.location.origin}/review/${business.id}`
@@ -235,15 +255,33 @@ export default function DashboardPage() {
     setTimeout(() => setCopied(false), 2000)
   }, [reviewUrl])
 
-  // Filtered reviews for the dedicated Reviews tab
+  const handleKeywordClick = useCallback((keyword) => {
+    setReviewSearch(keyword)
+    setActiveTab('reviews')
+  }, [])
+
+  // Filtered and sorted reviews for the dedicated Reviews tab
   const filteredReviews = useMemo(() => {
-    return reviews.filter((r) => {
+    let result = reviews.filter((r) => {
       const matchesSentiment = sentimentFilter === 'all' || r.sentiment === sentimentFilter
       const text = `${r.transcript || ''} ${(r.keywords || []).join(' ')}`.toLowerCase()
       const matchesSearch = !reviewSearch.trim() || text.includes(reviewSearch.toLowerCase().trim())
       return matchesSentiment && matchesSearch
     })
-  }, [reviews, sentimentFilter, reviewSearch])
+
+    if (sortBy === 'highest_rating') {
+      result.sort((a, b) => (b.star_rating ?? 0) - (a.star_rating ?? 0))
+    } else if (sortBy === 'lowest_rating') {
+      result.sort((a, b) => (a.star_rating ?? 0) - (b.star_rating ?? 0))
+    } else if (sortBy === 'highest_sentiment') {
+      result.sort((a, b) => (b.sentiment_score ?? 0) - (a.sentiment_score ?? 0))
+    } else {
+      // Default: newest
+      result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    }
+
+    return result
+  }, [reviews, sentimentFilter, reviewSearch, sortBy])
 
   if (loading) {
     return (
@@ -270,7 +308,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
-      {/* Refined Navigation Bar */}
+      {/* Navigation Bar */}
       <Navbar
         business={business}
         userEmail={userEmail}
@@ -324,34 +362,51 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Metric Stat Cards */}
+            {/* Metric Stat Cards with Progress & Contextual Breakdowns */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <StatCard
                 title="Total Feedback"
                 value={stats.totalReviews.toString()}
-                subtitle="all time received"
+                badge={stats.totalReviews > 0 ? `${stats.positiveCount} positive` : null}
+                subtitle={`${totalWeeklyReviews} received in the past 7 days`}
                 icon={<MessageSquare className="h-4 w-4" />}
+                progress={stats.totalReviews > 0 ? (stats.positiveCount / stats.totalReviews) * 100 : 0}
+                progressColor="bg-emerald-500"
               />
               <StatCard
                 title="Average Sentiment"
                 value={`${Math.round(stats.averageSentimentScore * 100)} / 100`}
-                subtitle="transcription AI confidence"
+                badge={stats.averageSentimentScore >= 0.7 ? 'Strong positive' : stats.averageSentimentScore >= 0.4 ? 'Neutral' : 'Needs attention'}
+                subtitle="speech transcription AI confidence"
                 icon={<TrendingUp className="h-4 w-4" />}
+                progress={Math.round(stats.averageSentimentScore * 100)}
+                progressColor={stats.averageSentimentScore >= 0.7 ? 'bg-emerald-400' : 'bg-amber-400'}
               />
               <StatCard
                 title="Average Rating"
                 value={`★ ${stats.averageStarRating.toFixed(1)}`}
-                subtitle="out of 5.0 stars"
+                badge="out of 5.0"
+                subtitle={stats.totalReviews > 0 ? `From ${stats.totalReviews} verified voice reviews` : 'Awaiting initial reviews'}
                 icon={<Star className="h-4 w-4" />}
+                progress={(stats.averageStarRating / 5) * 100}
+                progressColor="bg-amber-400"
               />
             </div>
 
             {/* 7-Day Chart */}
             <div className="rounded-xl border border-zinc-800 bg-[#121215] p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xs font-medium text-zinc-400">Activity &bull; Last 7 Days</h2>
-                <span className="text-[11px] text-zinc-500">Volume per day</span>
+                <div>
+                  <h2 className="text-xs font-medium text-zinc-400">Activity &bull; Last 7 Days</h2>
+                  <p className="text-[11px] text-zinc-500 mt-0.5">
+                    {totalWeeklyReviews > 0
+                      ? `${totalWeeklyReviews} total review${totalWeeklyReviews > 1 ? 's' : ''} received this week`
+                      : 'No reviews recorded in the last 7 days yet'}
+                  </p>
+                </div>
+                <span className="text-[11px] font-mono text-zinc-500">Daily volume</span>
               </div>
+
               <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} barCategoryGap="25%">
@@ -391,7 +446,10 @@ export default function DashboardPage() {
             {/* Recent Live Feed */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs font-medium text-zinc-400">Recent Customer Feed</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xs font-medium text-zinc-400">Recent Customer Feed</h2>
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                </div>
                 <button
                   onClick={() => setActiveTab('reviews')}
                   className="text-xs text-zinc-400 hover:text-zinc-200"
@@ -404,6 +462,7 @@ export default function DashboardPage() {
                   businessId={business.id}
                   initialReviews={reviews.slice(0, 5)}
                   onNewReview={handleNewReview}
+                  onKeywordClick={handleKeywordClick}
                 />
               )}
             </div>
@@ -432,8 +491,17 @@ export default function DashboardPage() {
                     value={reviewSearch}
                     onChange={(e) => setReviewSearch(e.target.value)}
                     placeholder="Search keywords or text..."
-                    className="w-48 sm:w-60 rounded-lg border border-zinc-800 bg-zinc-900/60 pl-8 pr-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 focus:border-zinc-500 focus:outline-none"
+                    className="w-48 sm:w-60 rounded-lg border border-zinc-800 bg-zinc-900/60 pl-8 pr-7 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 focus:border-zinc-500 focus:outline-none"
                   />
+                  {reviewSearch && (
+                    <button
+                      onClick={() => setReviewSearch('')}
+                      className="absolute right-2 top-2 text-zinc-500 hover:text-zinc-300"
+                      title="Clear search"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                 </div>
 
                 {/* Sentiment Filter Segment */}
@@ -452,8 +520,55 @@ export default function DashboardPage() {
                     </button>
                   ))}
                 </div>
+
+                {/* Sort dropdown */}
+                <div className="relative">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="appearance-none rounded-lg border border-zinc-800 bg-zinc-900/70 pl-2.5 pr-7 py-1.5 text-[11px] text-zinc-300 focus:border-zinc-500 focus:outline-none cursor-pointer"
+                  >
+                    <option value="newest">Newest First</option>
+                    <option value="highest_rating">Highest Rated</option>
+                    <option value="lowest_rating">Lowest Rated</option>
+                    <option value="highest_sentiment">Highest Sentiment</option>
+                  </select>
+                  <ArrowUpDown className="pointer-events-none absolute right-2 top-2 h-3 w-3 text-zinc-500" />
+                </div>
               </div>
             </div>
+
+            {/* Active Filters Bar if filtered */}
+            {(reviewSearch || sentimentFilter !== 'all') && (
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-zinc-500">Active filters:</span>
+                {reviewSearch && (
+                  <span className="inline-flex items-center gap-1 rounded-md bg-zinc-800 px-2 py-0.5 text-zinc-200">
+                    &ldquo;{reviewSearch}&rdquo;
+                    <button onClick={() => setReviewSearch('')}>
+                      <X className="h-3 w-3 hover:text-white" />
+                    </button>
+                  </span>
+                )}
+                {sentimentFilter !== 'all' && (
+                  <span className="inline-flex items-center gap-1 rounded-md bg-zinc-800 px-2 py-0.5 text-zinc-200 capitalize">
+                    {sentimentFilter}
+                    <button onClick={() => setSentimentFilter('all')}>
+                      <X className="h-3 w-3 hover:text-white" />
+                    </button>
+                  </span>
+                )}
+                <button
+                  onClick={() => {
+                    setReviewSearch('')
+                    setSentimentFilter('all')
+                  }}
+                  className="text-zinc-500 hover:text-zinc-300 underline ml-2"
+                >
+                  Reset all
+                </button>
+              </div>
+            )}
 
             {/* Review Cards List */}
             {filteredReviews.length === 0 ? (
@@ -463,11 +578,26 @@ export default function DashboardPage() {
                 <p className="text-xs text-zinc-500 mt-1">
                   Try adjusting your search query or sentiment filter.
                 </p>
+                {(reviewSearch || sentimentFilter !== 'all') && (
+                  <button
+                    onClick={() => {
+                      setReviewSearch('')
+                      setSentimentFilter('all')
+                    }}
+                    className="btn-secondary px-3 py-1.5 text-xs mt-3"
+                  >
+                    Clear Filters
+                  </button>
+                )}
               </div>
             ) : (
               <div className="grid gap-3">
                 {filteredReviews.map((review) => (
-                  <ReviewCard key={review.id} review={review} />
+                  <ReviewCard
+                    key={review.id}
+                    review={review}
+                    onKeywordClick={handleKeywordClick}
+                  />
                 ))}
               </div>
             )}

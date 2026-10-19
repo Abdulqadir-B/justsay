@@ -3,7 +3,7 @@ import { createClient } from '../lib/supabase.js'
 import ReviewCard from './ReviewCard.jsx'
 import { MessageSquare } from 'lucide-react'
 
-export default function ReviewFeed({ businessId, initialReviews, onNewReview }) {
+export default function ReviewFeed({ businessId, initialReviews, onNewReview, onKeywordClick }) {
   const [reviews, setReviews] = useState(initialReviews)
   const [newReviewIds, setNewReviewIds] = useState(new Set())
   const [toast, setToast] = useState(null)
@@ -81,6 +81,7 @@ export default function ReviewFeed({ businessId, initialReviews, onNewReview }) 
               key={review.id}
               review={review}
               isNew={newReviewIds.has(review.id)}
+              onKeywordClick={onKeywordClick}
             />
           ))
         )}
