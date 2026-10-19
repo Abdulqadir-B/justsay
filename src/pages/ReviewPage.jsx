@@ -187,8 +187,28 @@ export default function ReviewPage() {
           </div>
 
           {/* Voice Recorder Card */}
-          <div className="w-full rounded-2xl border border-zinc-800/90 bg-[#121215] p-8 shadow-xl">
+          <div className="w-full rounded-2xl border border-zinc-800/90 bg-[#121215] p-6 sm:p-8 shadow-xl">
             <VoiceRecorder onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+
+            {/* Quick 3-Step Micro Guide */}
+            {!isSubmitting && (
+              <div className="mt-6 pt-5 border-t border-zinc-850 flex items-center justify-around text-[11px] text-zinc-500">
+                <span className="flex items-center gap-1">
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-zinc-800 text-[10px] font-mono text-zinc-300">1</span>
+                  Tap mic
+                </span>
+                <span className="text-zinc-700">&bull;</span>
+                <span className="flex items-center gap-1">
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-zinc-800 text-[10px] font-mono text-zinc-300">2</span>
+                  Speak 5s
+                </span>
+                <span className="text-zinc-700">&bull;</span>
+                <span className="flex items-center gap-1">
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-zinc-800 text-[10px] font-mono text-zinc-300">3</span>
+                  Submit
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Submit error */}
