@@ -152,16 +152,16 @@ export default function VoiceRecorder({ onSubmit, isSubmitting }) {
   }, [onSubmit])
 
   return (
-    <div className="flex flex-col items-center gap-8">
+    <div className="flex flex-col items-center gap-7">
       {/* Mic Button */}
       {state === 'idle' && (
         <button
           onClick={startRecording}
           disabled={isSubmitting}
           aria-label="Start recording your review"
-          className="relative flex h-20 w-20 items-center justify-center rounded-full bg-accent-purple transition-all duration-300 hover:bg-accent-indigo focus:outline-none focus:ring-2 focus:ring-accent-purple focus:ring-offset-2 focus:ring-offset-surface animate-pulse-glow"
+          className="relative flex h-20 w-20 items-center justify-center rounded-full bg-zinc-100 text-zinc-950 transition-all hover:bg-white hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 focus:ring-offset-zinc-950 shadow-lg"
         >
-          <Mic className="h-8 w-8 text-white" />
+          <Mic className="h-8 w-8" />
         </button>
       )}
 
@@ -171,35 +171,35 @@ export default function VoiceRecorder({ onSubmit, isSubmitting }) {
           <button
             onClick={stopRecording}
             aria-label="Stop recording"
-            className="relative flex h-20 w-20 items-center justify-center rounded-full bg-red-500 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-surface animate-pulse-record"
+            className="relative flex h-20 w-20 items-center justify-center rounded-full bg-rose-600 text-white transition-all hover:bg-rose-500 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 focus:ring-offset-zinc-950 shadow-md"
           >
-            <Square className="h-6 w-6 text-white" />
+            <Square className="h-6 w-6 fill-current" />
           </button>
 
           <div className="text-center">
-            <span className="text-4xl font-bold tabular-nums text-white">
-              {countdown}
+            <span className="text-4xl font-semibold tabular-nums text-white">
+              {countdown}s
             </span>
-            <p className="text-sm text-gray-400 mt-1">seconds remaining</p>
+            <p className="text-xs text-zinc-400 mt-1">Recording (max 5 seconds)</p>
           </div>
 
-          <div className="flex items-center gap-1 h-12">
+          <div className="flex items-center gap-1.5 h-10">
             {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div
                 key={i}
-                className="w-1 rounded-full bg-red-400 animate-waveform"
+                className="w-1 rounded-full bg-rose-500/80 animate-waveform"
                 style={{
                   height: '100%',
                   animationDelay: `${i * 0.08}s`,
-                  animationDuration: `${0.4 + Math.random() * 0.4}s`,
+                  animationDuration: `${0.4 + (i % 3) * 0.2}s`,
                 }}
               />
             ))}
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-sm font-medium text-red-400">Recording...</span>
+            <div className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
+            <span className="text-xs font-medium text-rose-400">Listening to your voice...</span>
           </div>
         </div>
       )}
@@ -207,36 +207,36 @@ export default function VoiceRecorder({ onSubmit, isSubmitting }) {
       {/* Recorded State */}
       {state === 'recorded' && !isSubmitting && (
         <div className="flex flex-col items-center gap-6 animate-fade-in">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <button
               onClick={handlePlayPause}
               aria-label={isPlaying ? 'Pause playback' : 'Play recording'}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-elevated border border-surface-border text-white transition-all hover:bg-surface-card focus:outline-none focus:ring-2 focus:ring-accent-purple"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900 border border-zinc-750 text-zinc-200 transition-colors hover:bg-zinc-800 hover:text-white focus:outline-none focus:ring-1 focus:ring-zinc-400"
             >
               {isPlaying ? (
-                <Pause className="h-5 w-5" />
+                <Pause className="h-4 w-4" />
               ) : (
-                <Play className="h-5 w-5 ml-0.5" />
+                <Play className="h-4 w-4 ml-0.5 fill-current" />
               )}
             </button>
-            <span className="text-sm text-gray-400">Listen to your recording</span>
+            <span className="text-xs text-zinc-400">Preview recorded audio</span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <button
               onClick={handleRerecord}
               aria-label="Re-record your review"
-              className="flex items-center gap-2 rounded-xl border border-surface-border bg-surface-card px-5 py-3 text-sm font-medium text-gray-300 transition-all hover:bg-surface-elevated hover:text-white focus:outline-none focus:ring-2 focus:ring-accent-purple"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/80 px-4 py-2.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white focus:outline-none focus:ring-1 focus:ring-zinc-400"
             >
-              <RotateCcw className="h-4 w-4" />
+              <RotateCcw className="h-3.5 w-3.5" />
               Re-record
             </button>
             <button
               onClick={handleSubmit}
               aria-label="Submit your review"
-              className="flex items-center gap-2 rounded-xl bg-accent-purple px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-accent-indigo focus:outline-none focus:ring-2 focus:ring-accent-purple focus:ring-offset-2 focus:ring-offset-surface"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-100 px-4 py-2.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 focus:ring-offset-zinc-950"
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-3.5 w-3.5" />
               Submit Review
             </button>
           </div>
@@ -245,15 +245,15 @@ export default function VoiceRecorder({ onSubmit, isSubmitting }) {
 
       {/* Submitting State */}
       {isSubmitting && (
-        <div className="flex flex-col items-center gap-4 animate-fade-in">
-          <Loader2 className="h-10 w-10 text-accent-purple animate-spin" />
-          <p className="text-sm font-medium text-gray-300">Analyzing your review...</p>
+        <div className="flex flex-col items-center gap-3 animate-fade-in py-4">
+          <Loader2 className="h-8 w-8 text-zinc-300 animate-spin" />
+          <p className="text-xs font-medium text-zinc-400">Processing audio & transcription...</p>
         </div>
       )}
 
       {/* Error */}
       {error && (
-        <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400 animate-fade-in">
+        <div className="mt-2 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3.5 py-2.5 text-xs text-rose-300 animate-fade-in">
           {error}
         </div>
       )}

@@ -34,7 +34,7 @@ export default function ReviewFeed({ businessId, initialReviews, onNewReview }) 
           const newReview = payload.new
           setReviews((prev) => [newReview, ...prev])
           setNewReviewIds((prev) => new Set(prev).add(newReview.id))
-          showToast('New review received!')
+          showToast('New review received')
           onNewReview?.(newReview)
 
           setTimeout(() => {
@@ -43,7 +43,7 @@ export default function ReviewFeed({ businessId, initialReviews, onNewReview }) 
               next.delete(newReview.id)
               return next
             })
-          }, 5000)
+          }, 4000)
         }
       )
       .subscribe()
@@ -58,9 +58,9 @@ export default function ReviewFeed({ businessId, initialReviews, onNewReview }) 
       {/* Toast */}
       {toast && (
         <div className="fixed right-4 top-4 z-50 toast-enter">
-          <div className="flex items-center gap-2 rounded-xl border border-accent-purple/30 bg-surface-card px-4 py-3 shadow-lg shadow-accent-purple/10">
-            <div className="h-2 w-2 rounded-full bg-accent-purple animate-pulse" />
-            <span className="text-sm font-medium text-white">{toast}</span>
+          <div className="flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-3.5 py-2.5 shadow-xl">
+            <div className="h-2 w-2 rounded-full bg-emerald-400" />
+            <span className="text-xs font-medium text-zinc-100">{toast}</span>
           </div>
         </div>
       )}
@@ -68,11 +68,11 @@ export default function ReviewFeed({ businessId, initialReviews, onNewReview }) 
       {/* Reviews List */}
       <div className="space-y-3">
         {reviews.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-surface-border bg-surface-card/50 py-16 text-center">
-            <MessageSquare className="mb-3 h-10 w-10 text-gray-600" />
-            <p className="text-sm font-medium text-gray-400">No reviews yet</p>
-            <p className="mt-1 text-xs text-gray-600">
-              Reviews will appear here in real-time
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-850 bg-zinc-900/20 py-12 text-center">
+            <MessageSquare className="mb-2 h-8 w-8 text-zinc-600" />
+            <p className="text-sm font-medium text-zinc-400">No reviews yet</p>
+            <p className="mt-1 text-xs text-zinc-500">
+              Customer reviews will stream here in real time.
             </p>
           </div>
         ) : (

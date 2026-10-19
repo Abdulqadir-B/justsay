@@ -81,21 +81,20 @@ export default function ReviewPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
-        <Loader2 className="h-8 w-8 text-accent-purple animate-spin" />
+      <div className="flex min-h-screen items-center justify-center bg-zinc-950">
+        <Loader2 className="h-6 w-6 text-zinc-400 animate-spin" />
       </div>
     )
   }
 
   if (notFound) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-4">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <AlertCircle className="h-12 w-12 text-gray-500" />
-          <h1 className="text-xl font-semibold text-white">Business not found</h1>
-          <p className="text-sm text-gray-400 max-w-sm">
-            The review link you followed doesn&apos;t match any registered business.
-            Please check the link and try again.
+      <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-4">
+        <div className="flex flex-col items-center gap-3 text-center max-w-sm rounded-xl border border-zinc-800 bg-[#121215] p-8">
+          <AlertCircle className="h-10 w-10 text-zinc-500" />
+          <h1 className="text-base font-semibold text-white">Business not found</h1>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            The review link you followed doesn&apos;t match any registered business. Please verify the URL.
           </p>
         </div>
       </div>
@@ -104,15 +103,15 @@ export default function ReviewPage() {
 
   if (submitted) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-4">
-        <div className="flex flex-col items-center gap-6 text-center animate-fade-in">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-sentiment-positive/10">
-            <CheckCircle className="h-10 w-10 text-sentiment-positive" />
+      <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-4">
+        <div className="flex flex-col items-center gap-5 text-center animate-fade-in max-w-sm rounded-xl border border-zinc-800 bg-[#121215] p-8 shadow-xl">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20">
+            <CheckCircle className="h-6 w-6 text-emerald-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">Thank you!</h1>
-            <p className="mt-2 text-sm text-gray-400 max-w-xs">
-              Your feedback helps <span className="font-semibold text-white">{businessName}</span> improve.
+            <h1 className="text-xl font-semibold text-white">Thank you!</h1>
+            <p className="mt-1.5 text-xs text-zinc-400 leading-relaxed">
+              Your feedback was recorded for <span className="font-medium text-zinc-200">{businessName}</span>.
             </p>
           </div>
         </div>
@@ -121,32 +120,33 @@ export default function ReviewPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-4">
-      <div className="flex w-full max-w-md flex-col items-center gap-8 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-4 py-12">
+      <div className="flex w-full max-w-md flex-col items-center gap-7 text-center">
         {/* Header */}
-        <div>
-          <p className="text-sm font-medium text-accent-purple uppercase tracking-wider">Voice Review</p>
-          <h1 className="mt-2 text-2xl font-bold text-white">
-            Leave a review for{' '}
-            <span className="bg-gradient-to-r from-accent-purple to-accent-blue bg-clip-text text-transparent">
-              {businessName}
-            </span>
+        <div className="space-y-2">
+          <span className="inline-flex items-center rounded-md border border-zinc-800 bg-zinc-900/60 px-2.5 py-1 text-xs font-mono uppercase tracking-wider text-zinc-400">
+            Customer Feedback
+          </span>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">
+            Leave a review for <span className="text-zinc-100 underline decoration-zinc-700 underline-offset-4">{businessName}</span>
           </h1>
-          <p className="mt-3 text-sm text-gray-400">
-            Tap the mic and speak for up to 5 seconds
+          <p className="text-xs text-zinc-400">
+            Tap the mic and speak for up to 5 seconds.
           </p>
         </div>
 
-        {/* Voice Recorder */}
-        <VoiceRecorder onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+        {/* Voice Recorder Box */}
+        <div className="w-full rounded-2xl border border-zinc-800/90 bg-[#121215] p-8 shadow-xl">
+          <VoiceRecorder onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+        </div>
 
         {/* Submit error */}
         {submitError && (
-          <div className="w-full rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-center animate-fade-in">
-            <p className="text-sm text-red-400">{submitError}</p>
+          <div className="w-full rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-center animate-fade-in">
+            <p className="text-xs text-rose-300">{submitError}</p>
             <button
               onClick={() => setSubmitError(null)}
-              className="mt-2 text-xs font-medium text-red-300 underline hover:text-red-200"
+              className="mt-1.5 text-xs font-medium text-rose-400 underline hover:text-rose-300"
               aria-label="Dismiss error and try again"
             >
               Try again
@@ -155,8 +155,8 @@ export default function ReviewPage() {
         )}
 
         {/* Footer */}
-        <p className="text-xs text-gray-600">
-          Powered by <span className="font-semibold text-gray-500">JustSay</span>
+        <p className="text-xs text-zinc-600">
+          Powered by <span className="font-medium text-zinc-500">JustSay</span>
         </p>
       </div>
     </div>

@@ -72,140 +72,142 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface px-4">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-12">
       <div className="w-full max-w-sm">
 
         {/* Logo */}
-        <div className="mb-8 flex flex-col items-center gap-3">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-purple/10 border border-accent-purple/20">
-            <AudioLines className="h-7 w-7 text-accent-purple" />
+        <div className="mb-7 flex flex-col items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-100 shadow-sm">
+            <AudioLines className="h-5 w-5" />
           </div>
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-white">JustSay</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              {mode === 'signin' ? 'Sign in to your dashboard' : 'Create your account'}
+            <h1 className="text-xl font-semibold tracking-tight text-white">JustSay</h1>
+            <p className="mt-1 text-xs text-zinc-400">
+              {mode === 'signin' ? 'Sign in to access your business dashboard' : 'Create an account to start collecting voice reviews'}
             </p>
           </div>
         </div>
 
-        {/* Tab Toggle */}
-        <div className="mb-6 flex rounded-xl border border-surface-border bg-surface-card p-1">
-          <button
-            type="button"
-            onClick={() => switchMode('signin')}
-            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
-              mode === 'signin'
-                ? 'bg-accent-purple text-white shadow'
-                : 'text-gray-500 hover:text-gray-300'
-            }`}
-          >
-            Sign In
-          </button>
-          <button
-            type="button"
-            onClick={() => switchMode('signup')}
-            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
-              mode === 'signup'
-                ? 'bg-accent-purple text-white shadow'
-                : 'text-gray-500 hover:text-gray-300'
-            }`}
-          >
-            Sign Up
-          </button>
-        </div>
-
-        {/* Success State */}
-        {signUpSuccess ? (
-          <div className="flex flex-col items-center gap-4 rounded-2xl border border-green-500/20 bg-green-500/10 px-6 py-8 text-center">
-            <CheckCircle2 className="h-10 w-10 text-green-400" />
-            <div>
-              <p className="font-semibold text-white">Check your email!</p>
-              <p className="mt-1 text-sm text-gray-400">
-                We sent a confirmation link to <span className="text-white">{email}</span>.
-                Click it to activate your account, then sign in.
-              </p>
-            </div>
+        {/* Card */}
+        <div className="rounded-2xl border border-zinc-800/90 bg-[#121215] p-6 shadow-xl">
+          {/* Tab Toggle */}
+          <div className="mb-5 flex rounded-lg border border-zinc-800 bg-zinc-950 p-1">
             <button
               type="button"
               onClick={() => switchMode('signin')}
-              className="mt-2 text-sm font-medium text-accent-purple hover:underline"
+              className={`flex-1 rounded-md py-1.5 text-xs font-medium transition-all ${
+                mode === 'signin'
+                  ? 'bg-zinc-800 text-white shadow-sm'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
             >
-              Back to Sign In
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => switchMode('signup')}
+              className={`flex-1 rounded-md py-1.5 text-xs font-medium transition-all ${
+                mode === 'signup'
+                  ? 'bg-zinc-800 text-white shadow-sm'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              Sign Up
             </button>
           </div>
-        ) : (
-          /* Form */
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-1.5">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
-                className="w-full rounded-xl border border-surface-border bg-surface-card px-4 py-3 text-sm text-white placeholder-gray-600 transition-colors focus:border-accent-purple focus:outline-none focus:ring-1 focus:ring-accent-purple"
-              />
-            </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-400 mb-1.5">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                className="w-full rounded-xl border border-surface-border bg-surface-card px-4 py-3 text-sm text-white placeholder-gray-600 transition-colors focus:border-accent-purple focus:outline-none focus:ring-1 focus:ring-accent-purple"
-              />
-            </div>
-
-            {mode === 'signup' && (
+          {/* Success State */}
+          {signUpSuccess ? (
+            <div className="flex flex-col items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-6 text-center animate-fade-in">
+              <CheckCircle2 className="h-8 w-8 text-emerald-400" />
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-400 mb-1.5">
-                  Confirm Password
+                <p className="font-medium text-sm text-white">Check your email</p>
+                <p className="mt-1 text-xs text-zinc-400">
+                  We sent a confirmation link to <span className="font-medium text-zinc-200">{email}</span>. Click it to verify, then sign in.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => switchMode('signin')}
+                className="mt-2 text-xs font-medium text-zinc-300 underline hover:text-white"
+              >
+                Back to Sign In
+              </button>
+            </div>
+          ) : (
+            /* Form */
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-xs font-medium text-zinc-400 mb-1.5">
+                  Work Email
                 </label>
                 <input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@business.com"
                   required
-                  className="w-full rounded-xl border border-surface-border bg-surface-card px-4 py-3 text-sm text-white placeholder-gray-600 transition-colors focus:border-accent-purple focus:outline-none focus:ring-1 focus:ring-accent-purple"
+                  className="input-subtle"
                 />
               </div>
-            )}
 
-            {/* Error */}
-            {error && (
-              <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                {error}
+              <div>
+                <label htmlFor="password" className="block text-xs font-medium text-zinc-400 mb-1.5">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="input-subtle"
+                />
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-xl bg-accent-purple px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-accent-indigo focus:outline-none focus:ring-2 focus:ring-accent-purple focus:ring-offset-2 focus:ring-offset-surface disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {mode === 'signin' ? 'Signing in...' : 'Creating account...'}
-                </span>
-              ) : (
-                mode === 'signin' ? 'Sign In' : 'Create Account'
+              {mode === 'signup' && (
+                <div>
+                  <label htmlFor="confirmPassword" className="block text-xs font-medium text-zinc-400 mb-1.5">
+                    Confirm Password
+                  </label>
+                  <input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    className="input-subtle"
+                  />
+                </div>
               )}
-            </button>
-          </form>
-        )}
+
+              {/* Error */}
+              {error && (
+                <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3.5 py-2.5 text-xs text-rose-300 animate-fade-in">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full py-2.5 mt-2"
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {mode === 'signin' ? 'Signing in...' : 'Creating account...'}
+                  </span>
+                ) : (
+                  mode === 'signin' ? 'Sign In' : 'Create Account'
+                )}
+              </button>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   )
