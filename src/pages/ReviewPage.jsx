@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useParams } from 'react-router-dom'
-import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { useParams, useSearchParams, Link } from 'react-router-dom'
+import { CheckCircle, AlertCircle, Loader2, ArrowLeft, Eye, ShieldCheck } from 'lucide-react'
 import VoiceRecorder from '../components/VoiceRecorder.jsx'
 import { createClient } from '../lib/supabase.js'
 
 export default function ReviewPage() {
   const { businessId } = useParams()
+  const [searchParams] = useSearchParams()
+  const isPreview = searchParams.get('preview') === 'true'
 
   const [businessName, setBusinessName] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -96,6 +98,13 @@ export default function ReviewPage() {
           <p className="text-xs text-zinc-400 leading-relaxed">
             The review link you followed doesn&apos;t match any registered business. Please verify the URL.
           </p>
+          <Link
+            to="/dashboard"
+            className="mt-3 inline-flex items-center gap-1.5 text-xs text-zinc-300 hover:text-white underline underline-offset-4"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Go to Dashboard
+          </Link>
         </div>
       </div>
     )
@@ -114,51 +123,97 @@ export default function ReviewPage() {
               Your feedback was recorded for <span className="font-medium text-zinc-200">{businessName}</span>.
             </p>
           </div>
+          <div className="flex items-center gap-2 pt-2">
+            <button
+              onClick={() => setSubmitted(false)}
+              className="text-xs text-zinc-400 hover:text-zinc-200 underline"
+            >
+              Record another
+            </button>
+            {isPreview && (
+              <>
+                <span className="text-zinc-600">&bull;</span>
+                <Link
+                  to="/dashboard"
+                  className="text-xs text-zinc-300 hover:text-white underline"
+                >
+                  Return to Dashboard
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-4 py-12">
-      <div className="flex w-full max-w-md flex-col items-center gap-7 text-center">
-        {/* Header */}
-        <div className="space-y-2">
-          <span className="inline-flex items-center rounded-md border border-zinc-800 bg-zinc-900/60 px-2.5 py-1 text-xs font-mono uppercase tracking-wider text-zinc-400">
-            Customer Feedback
-          </span>
-          <h1 className="text-2xl font-semibold tracking-tight text-white">
-            Leave a review for <span className="text-zinc-100 underline decoration-zinc-700 underline-offset-4">{businessName}</span>
-          </h1>
-          <p className="text-xs text-zinc-400">
-            Tap the mic and speak for up to 5 seconds.
-          </p>
-        </div>
-
-        {/* Voice Recorder Box */}
-        <div className="w-full rounded-2xl border border-zinc-800/90 bg-[#121215] p-8 shadow-xl">
-          <VoiceRecorder onSubmit={handleSubmit} isSubmitting={isSubmitting} />
-        </div>
-
-        {/* Submit error */}
-        {submitError && (
-          <div className="w-full rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-center animate-fade-in">
-            <p className="text-xs text-rose-300">{submitError}</p>
-            <button
-              onClick={() => setSubmitError(null)}
-              className="mt-1.5 text-xs font-medium text-rose-400 underline hover:text-rose-300"
-              aria-label="Dismiss error and try again"
+    <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
+      {/* Admin Preview Mode Header */}
+      {isPreview && (
+        <aside className="w-full bg-zinc-900/90 border-b border-zinc-800 px-4 py-2.5 text-xs text-zinc-300 sticky top-0 z-50 backdrop-blur-sm">
+          <div className="mx-auto max-w-2xl flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Eye className="h-3.5 w-3.5 text-amber-400" />
+              <span className="font-medium text-zinc-200">Admin Preview Mode</span>
+              <span className="hidden sm:inline text-zinc-500">— Test how customers experience your review link</span>
+            </div>
+            <Link
+              to="/dashboard"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-white hover:text-zinc-200 px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700 transition-colors"
             >
-              Try again
-            </button>
+              <ArrowLeft className="h-3 w-3" />
+              Back to Dashboard
+            </Link>
           </div>
-        )}
+        </aside>
+      )}
 
-        {/* Footer */}
-        <p className="text-xs text-zinc-600">
-          Powered by <span className="font-medium text-zinc-500">JustSay</span>
-        </p>
-      </div>
+      {/* Main Review Container */}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
+        <div className="flex w-full max-w-md flex-col items-center gap-7 text-center">
+          {/* Header */}
+          <div className="space-y-2.5">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900/70 px-3 py-1 text-xs text-zinc-400">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+              <span>Verified Business</span>
+            </div>
+            <h1 className="text-2xl font-semibold tracking-tight text-white">
+              Leave a voice review for <span className="text-zinc-100 underline decoration-zinc-700 underline-offset-4">{businessName}</span>
+            </h1>
+            <p className="text-xs text-zinc-400">
+              Tap the microphone and speak for up to 5 seconds.
+            </p>
+          </div>
+
+          {/* Voice Recorder Card */}
+          <div className="w-full rounded-2xl border border-zinc-800/90 bg-[#121215] p-8 shadow-xl">
+            <VoiceRecorder onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+          </div>
+
+          {/* Submit error */}
+          {submitError && (
+            <div className="w-full rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-center animate-fade-in">
+              <p className="text-xs text-rose-300">{submitError}</p>
+              <button
+                onClick={() => setSubmitError(null)}
+                className="mt-1.5 text-xs font-medium text-rose-400 underline hover:text-rose-300"
+                aria-label="Dismiss error and try again"
+              >
+                Try again
+              </button>
+            </div>
+          )}
+
+          {/* Clean Footer Navigation */}
+          <div className="flex items-center justify-between w-full pt-4 border-t border-zinc-900 text-xs text-zinc-600">
+            <span>Powered by <span className="text-zinc-500 font-medium">JustSay</span></span>
+            <Link to="/dashboard" className="hover:text-zinc-400 transition-colors">
+              Business Portal &rarr;
+            </Link>
+          </div>
+        </div>
+      </main>
     </div>
   )
 }
