@@ -1,5 +1,13 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, AudioLines, BarChart3, Mic, QrCode } from "lucide-react";
+import {
+  ArrowRight,
+  AudioLines,
+  BarChart3,
+  Linkedin,
+  Mail,
+  Mic,
+  QrCode,
+} from "lucide-react";
 
 const steps = [
   {
@@ -40,7 +48,7 @@ export default function LandingPage() {
         <div className="pointer-events-none absolute -right-32 top-8 h-80 w-80 rounded-full bg-emerald-400/10 blur-3xl" />
         <div className="relative max-w-3xl">
           <p className="mb-5 text-xs font-medium uppercase tracking-[0.2em] text-emerald-400">
-            Voice feedback for local businesses
+            Voice feedback for customer-focused businesses
           </p>
           <h1 className="max-w-2xl text-5xl font-semibold tracking-tight text-white sm:text-7xl">
             Let customers just say what they think.
@@ -80,6 +88,32 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+
+      <footer className="border-t border-zinc-900 px-5 py-8 sm:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 text-xs sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-zinc-500">
+            Built by <span className="font-medium text-zinc-300">Abdul Qadir Bearingwala</span>
+          </p>
+          <div className="flex flex-wrap items-center gap-4">
+            <a
+              href="https://linkedin.com/in/abdulqadir-bearingwala"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-zinc-500 transition-colors hover:text-zinc-200"
+            >
+              <Linkedin className="h-3.5 w-3.5" />
+              LinkedIn
+            </a>
+            <a
+              href="mailto:abdulqadirworkstudio@gmail.com"
+              className="inline-flex items-center gap-1.5 text-zinc-500 transition-colors hover:text-zinc-200"
+            >
+              <Mail className="h-3.5 w-3.5" />
+              Contact
+            </a>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
