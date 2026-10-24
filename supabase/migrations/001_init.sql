@@ -183,13 +183,3 @@ $$;
 
 REVOKE ALL ON FUNCTION consume_business_creation_limit() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION consume_business_creation_limit() TO authenticated;
-
--- ============================================
--- Seed Data: Demo Business
--- ============================================
-INSERT INTO businesses (id, name, owner_email)
-VALUES (
-  '00000000-0000-0000-0000-000000000001',
-  'Demo Salon',
-  'demo@justsay.app'
-);
