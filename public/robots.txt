@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /dashboard
+Disallow: /review/
+Sitemap: https://justsay-web.vercel.app/sitemap.xml

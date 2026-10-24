@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  AudioLines,
   BarChart3,
   Linkedin,
   Mail,
   Mic,
   QrCode,
 } from "lucide-react";
+import BrandLogo from "../components/BrandLogo.jsx";
 
 const steps = [
   {
@@ -27,17 +27,30 @@ const steps = [
   },
 ];
 
+const faqs = [
+  {
+    question: "How do customers leave a voice review?",
+    answer:
+      "Customers scan your QR code or open your review link, then record a quick voice message without filling out a long form.",
+  },
+  {
+    question: "How long can a review be?",
+    answer:
+      "JustSay is designed for focused five-second voice reviews that are easy for customers to leave and easy for businesses to review.",
+  },
+  {
+    question: "What can I see in the business dashboard?",
+    answer:
+      "The dashboard brings together voice reviews, sentiment analysis, keywords, star ratings, and real-time review activity.",
+  },
+];
+
 export default function LandingPage() {
   return (
     <main className="min-h-screen overflow-hidden bg-zinc-950 text-zinc-100">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
         <Link to="/" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-100">
-            <AudioLines className="h-4 w-4" />
-          </span>
-          <span className="text-sm font-semibold tracking-tight text-white">
-            JustSay
-          </span>
+          <BrandLogo size="md" />
         </Link>
         <Link to="/login" className="btn-ghost px-3 py-2 text-xs">
           Sign in
@@ -86,6 +99,37 @@ export default function LandingPage() {
               </p>
             </article>
           ))}
+        </div>
+
+        <div className="relative mt-24 grid gap-12 border-t border-zinc-900 pt-16 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-emerald-400">
+              Voice review software
+            </p>
+            <h2 className="mt-4 max-w-md text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              Better customer feedback starts with less friction.
+            </h2>
+            <p className="mt-5 max-w-md text-sm leading-7 text-zinc-500 sm:text-base">
+              JustSay gives businesses a simple way to collect authentic customer
+              feedback and spot patterns without asking people to write a long survey.
+            </p>
+          </div>
+
+          <div className="divide-y divide-zinc-900">
+            {faqs.map(({ question, answer }) => (
+              <details key={question} className="group py-5 first:pt-0 last:pb-0">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-sm font-medium text-zinc-200 marker:hidden">
+                  {question}
+                  <span className="text-lg font-light text-zinc-500 transition-transform group-open:rotate-45">
+                    +
+                  </span>
+                </summary>
+                <p className="mt-3 max-w-xl pr-8 text-sm leading-6 text-zinc-500">
+                  {answer}
+                </p>
+              </details>
+            ))}
+          </div>
         </div>
       </section>
 

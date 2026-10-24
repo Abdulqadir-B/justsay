@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createClient } from '../lib/supabase.js'
-import { Loader2, AudioLines, CheckCircle2, Eye, EyeOff } from 'lucide-react'
+import { Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react'
+import BrandLogo from '../components/BrandLogo.jsx'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -81,9 +82,7 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="mb-7 flex flex-col items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-100 shadow-sm">
-            <AudioLines className="h-5 w-5" />
-          </div>
+          <BrandLogo size="md" showName={false} />
           <div className="text-center">
             <h1 className="text-xl font-semibold tracking-tight text-white">JustSay</h1>
             <p className="mt-1 text-xs text-zinc-400">

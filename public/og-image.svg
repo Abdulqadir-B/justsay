@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">JustSay voice reviews</title>
+  <desc id="description">Collect quick voice reviews and understand customer feedback.</desc>
+  <rect width="1200" height="630" fill="#09090b" />
+  <circle cx="1010" cy="80" r="250" fill="#10b981" opacity="0.09" />
+  <rect x="90" y="92" width="72" height="72" rx="16" fill="#18181b" stroke="#3f3f46" />
+  <path d="M112 126v18M120 117v36M128 112v46M136 120v38M144 126v18" fill="none" stroke="#34d399" stroke-width="5" stroke-linecap="round" />
+  <text x="90" y="270" fill="#ffffff" font-family="Arial, sans-serif" font-size="72" font-weight="700">JustSay</text>
+  <text x="90" y="350" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="34">Voice reviews for better customer feedback.</text>
+  <text x="90" y="480" fill="#34d399" font-family="Arial, sans-serif" font-size="22" letter-spacing="4">LISTEN. UNDERSTAND. IMPROVE.</text>
+</svg>

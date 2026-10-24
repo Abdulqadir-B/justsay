@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createClient } from '../lib/supabase.js'
 import {
-  AudioLines, MessageSquare, TrendingUp, Star,
+  MessageSquare, TrendingUp, Star,
   Loader2, Link as LinkIcon, Copy, Check, ExternalLink,
   Search, X, ArrowUpDown, QrCode, Download
 } from 'lucide-react'
 import Navbar from '../components/Navbar.jsx'
+import BrandLogo from '../components/BrandLogo.jsx'
 import StatCard from '../components/StatCard.jsx'
 import ReviewFeed from '../components/ReviewFeed.jsx'
 import ReviewCard from '../components/ReviewCard.jsx'
@@ -127,9 +128,7 @@ function OnboardingCard({ userEmail, onCreated }) {
     <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-12">
       <div className="w-full max-w-md">
         <div className="mb-7 flex flex-col items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-100 shadow-sm">
-            <AudioLines className="h-6 w-6" />
-          </div>
+          <BrandLogo size="lg" showName={false} />
           <div className="text-center">
             <h1 className="text-xl font-semibold tracking-tight text-white">Welcome to JustSay</h1>
             <p className="mt-1 text-xs text-zinc-400">Set up your business name to start collecting voice reviews.</p>

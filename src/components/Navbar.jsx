@@ -1,4 +1,5 @@
-import { AudioLines, LogOut, LayoutDashboard, MessageSquare, QrCode } from 'lucide-react'
+import { LogOut, LayoutDashboard, MessageSquare, QrCode } from 'lucide-react'
+import BrandLogo from './BrandLogo.jsx'
 
 export default function Navbar({
   business,
@@ -15,14 +16,7 @@ export default function Navbar({
         
         {/* Left: Brand + Context Badge */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-100">
-              <AudioLines className="h-4 w-4" />
-            </div>
-            <span className="font-semibold text-sm tracking-tight text-white hidden xs:inline">
-              JustSay
-            </span>
-          </div>
+          <BrandLogo size="sm" className="hidden xs:flex" />
 
           {business && (
             <div className="flex items-center gap-2 pl-3 border-l border-zinc-800">
