@@ -34,15 +34,13 @@ function validateResult(data) {
   return { transcript, sentiment, sentiment_score, keywords, star_rating }
 }
 
-async function analyzeAudio(audioBase64, mimeType) {
-  const apiKey = Deno.env.get('GEMINI_API_KEY')
-  if (!apiKey) throw new Error('GEMINI_API_KEY is not configured')
+// In-memory cache for available models to avoid repeated 300-600ms network lookups on warm requests
+let cachedModels = null
 
-  const genAI = new GoogleGenerativeAI(apiKey)
-  const cleanMimeType = (mimeType || 'audio/webm').split(';')[0].trim()
-  const audioPart = { inlineData: { data: audioBase64, mimeType: cleanMimeType } }
-
-  let modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest']
+async function getSupportedModels(apiKey) {
+  if (cachedModels && cachedModels.length > 0) {
+    return cachedModels
+  }
 
   try {
     const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`)
@@ -55,46 +53,104 @@ async function analyzeAudio(audioBase64, mimeType) {
             m.supportedGenerationMethods?.includes('generateContent') &&
             !name.includes('tts') &&
             !name.includes('embed') &&
-            !name.includes('imagen')
+            !name.includes('imagen') &&
+            !name.includes('gemma') && // Gemma text models do not support audio input
+            !name.includes('2.5-flash') && // Deprecated by Google
+            !name.includes('2.5-pro') // Deprecated by Google
           )
         })
         .map((m) => m.name.replace('models/', ''))
 
       if (activeGenModels.length > 0) {
-        const preferred = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro', 'gemini-2.0-flash-exp']
+        console.log('Available Gemini models for account:', activeGenModels)
+        const preferred = [
+          'gemini-flash-lite-latest',
+          'gemini-3.5-flash-lite',
+          'gemini-3.1-flash-lite',
+          'gemini-3.8-flash',
+          'gemini-3-flash-preview',
+          'gemini-flash-latest',
+        ]
         const matched = preferred.filter((p) => activeGenModels.includes(p))
         const remaining = activeGenModels.filter((m) => !matched.includes(m))
-        modelsToTry = [...matched, ...remaining]
+        cachedModels = [...matched, ...remaining]
+        return cachedModels
       }
     }
   } catch (err) {
-    console.warn('Could not list models, using fallback list:', err)
+    console.warn('Could not query model list, using fallback list:', err)
   }
 
+  return [
+    'gemini-flash-lite-latest',
+    'gemini-3.5-flash-lite',
+    'gemini-3.1-flash-lite',
+    'gemini-3.8-flash',
+    'gemini-3-flash-preview',
+    'gemini-flash-latest',
+  ]
+}
+
+async function analyzeAudio(audioBase64, mimeType) {
+  const tStart = Date.now()
+  const apiKey = Deno.env.get('GEMINI_API_KEY')
+  if (!apiKey) throw new Error('GEMINI_API_KEY is not configured')
+
+  const genAI = new GoogleGenerativeAI(apiKey)
+  const cleanMimeType = (mimeType || 'audio/webm').split(';')[0].trim()
+  const audioPart = { inlineData: { data: audioBase64, mimeType: cleanMimeType } }
+
+  const modelsToTry = await getSupportedModels(apiKey)
   let lastError = null
+  const attempts = []
 
   for (const modelName of modelsToTry) {
+    const modelStart = Date.now()
+    let timeoutId = null
     try {
+      console.log(`[process-review] Attempting model: ${modelName}`)
       const model = genAI.getGenerativeModel({ model: modelName })
-      const result = await model.generateContent([ANALYSIS_PROMPT, audioPart])
+
+      // Enforce a strict 7-second timeout race per model to prevent Google queue hangs
+      const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error(`Timeout: ${modelName} exceeded 7000ms latency ceiling`))
+        }, 7000)
+      })
+
+      const generatePromise = model.generateContent([ANALYSIS_PROMPT, audioPart])
+      const result = await Promise.race([generatePromise, timeoutPromise])
+      if (timeoutId) clearTimeout(timeoutId)
+
       const text = result.response.text()
       const cleaned = text
         .replace(/```json\s*/gi, '')
         .replace(/```\s*/g, '')
         .trim()
       const parsed = JSON.parse(cleaned)
-      return validateResult(parsed)
+      const data = validateResult(parsed)
+      const durationMs = Date.now() - modelStart
+      console.log(`[process-review] Succeeded with ${modelName} in ${durationMs}ms`)
+      return {
+        ...data,
+        _modelUsed: modelName,
+        _modelDurationMs: durationMs,
+        _totalAiMs: Date.now() - tStart,
+        _attempts: attempts,
+      }
     } catch (error) {
+      if (timeoutId) clearTimeout(timeoutId)
       lastError = error
-      const msg = error?.message ?? ''
-      const isQuota = msg.includes('429') || msg.includes('quota')
-      const isNotFound = msg.includes('404') || msg.includes('not found')
-      const isModality = msg.includes('modality') || msg.includes('Audio input')
-      if (!isQuota && !isNotFound && !isModality) break
+      const durationMs = Date.now() - modelStart
+      console.warn(`[process-review] Model ${modelName} failed after ${durationMs}ms:`, error?.message ?? error)
+      attempts.push({ model: modelName, durationMs, error: error?.message ?? String(error) })
+      // Try next model in list without hanging
     }
   }
 
-  throw lastError ?? new Error('Gemini analysis failed — all models exhausted')
+  const finalError = lastError ?? new Error('Gemini analysis failed — all models exhausted')
+  finalError._attempts = attempts
+  throw finalError
 }
 
 const corsHeaders = {
@@ -110,6 +166,7 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const serverStart = Date.now()
     const body = await req.json()
     const { audioBase64, mimeType, businessId } = body
 
@@ -125,31 +182,74 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     )
 
-    // Verify business exists
-    const { data: business, error: bizError } = await supabase
+    const forwardedFor = req.headers.get('x-forwarded-for')
+    const clientIp = forwardedFor?.split(',')[0]?.trim()
+      || req.headers.get('x-real-ip')
+      || 'unknown'
+    const { data: rateLimitData, error: rateLimitError } = await supabase.rpc(
+      'consume_rate_limit',
+      {
+        p_bucket_key: `process-review:${clientIp}`,
+        p_limit: 5,
+        p_window_seconds: 3600,
+      }
+    )
+
+    if (rateLimitError) {
+      console.error('Rate limiter failed:', rateLimitError)
+      return Response.json(
+        { success: false, error: 'Review service is temporarily unavailable. Please try again.' },
+        { status: 503, headers: corsHeaders }
+      )
+    }
+
+    const rateLimit = rateLimitData?.[0]
+    if (!rateLimit?.allowed) {
+      const retryAfter = rateLimit?.retry_after_seconds || 3600
+      return Response.json(
+        { success: false, error: 'Too many review submissions. Please try again later.' },
+        {
+          status: 429,
+          headers: { ...corsHeaders, 'Retry-After': String(retryAfter) },
+        }
+      )
+    }
+
+    // Run business verification and Gemini AI audio analysis concurrently
+    const businessCheckPromise = supabase
       .from('businesses')
       .select('id')
       .eq('id', businessId)
       .single()
 
-    if (bizError || !business) {
+    const aiAnalysisPromise = analyzeAudio(audioBase64, mimeType)
+
+    const [bizResult, aiResult] = await Promise.allSettled([
+      businessCheckPromise,
+      aiAnalysisPromise,
+    ])
+
+    if (bizResult.status === 'rejected' || bizResult.value.error || !bizResult.value.data) {
       return Response.json(
         { success: false, error: 'Business not found' },
         { status: 404, headers: corsHeaders }
       )
     }
 
-    // Analyze audio with Gemini
-    let analysisResult
-    try {
-      analysisResult = await analyzeAudio(audioBase64, mimeType)
-    } catch (error) {
+    if (aiResult.status === 'rejected') {
+      const error = aiResult.reason
       console.error('AI processing failed:', error)
       return Response.json(
-        { success: false, error: `AI processing failed: ${error?.message || error}` },
+        {
+          success: false,
+          error: error?.message || 'Could not analyze voice note. Please try again.',
+          attempts: error?._attempts || [],
+        },
         { status: 502, headers: corsHeaders }
       )
     }
+
+    const analysisResult = aiResult.value
 
     // Insert review
     const { data: review, error: insertError } = await supabase
@@ -173,7 +273,18 @@ Deno.serve(async (req) => {
     }
 
     return Response.json(
-      { success: true, reviewId: review.id },
+      {
+        success: true,
+        reviewId: review.id,
+        timings: {
+          serverTotalMs: Date.now() - serverStart,
+          modelUsed: analysisResult._modelUsed,
+          modelDurationMs: analysisResult._modelDurationMs,
+          totalAiMs: analysisResult._totalAiMs,
+          attempts: analysisResult._attempts,
+          availableModels: cachedModels,
+        },
+      },
       { headers: corsHeaders }
     )
   } catch (error) {

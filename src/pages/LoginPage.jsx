@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createClient } from '../lib/supabase.js'
-import { Loader2, AudioLines, CheckCircle2 } from 'lucide-react'
+import { Loader2, AudioLines, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -9,6 +9,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [signUpSuccess, setSignUpSuccess] = useState(false)
@@ -19,6 +21,8 @@ export default function LoginPage() {
     setEmail('')
     setPassword('')
     setConfirmPassword('')
+    setShowPassword(false)
+    setShowConfirmPassword(false)
     setSignUpSuccess(false)
   }
 
@@ -156,15 +160,25 @@ export default function LoginPage() {
                 <label htmlFor="password" className="block text-xs font-medium text-zinc-400 mb-1.5">
                   Password
                 </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className="input-subtle"
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    className="input-subtle pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-zinc-500 transition-colors hover:text-zinc-300 focus:outline-none focus:text-zinc-200"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
 
               {mode === 'signup' && (
@@ -172,15 +186,25 @@ export default function LoginPage() {
                   <label htmlFor="confirmPassword" className="block text-xs font-medium text-zinc-400 mb-1.5">
                     Confirm Password
                   </label>
-                  <input
-                    id="confirmPassword"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    className="input-subtle"
-                  />
+                  <div className="relative">
+                    <input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      className="input-subtle pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((visible) => !visible)}
+                      aria-label={showConfirmPassword ? 'Hide confirmation password' : 'Show confirmation password'}
+                      className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-zinc-500 transition-colors hover:text-zinc-300 focus:outline-none focus:text-zinc-200"
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                 </div>
               )}
 

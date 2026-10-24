@@ -95,6 +95,20 @@ function OnboardingCard({ userEmail, onCreated }) {
     setErr(null)
     try {
       const supabase = createClient()
+      const { data: rateLimitData, error: rateLimitError } = await supabase.rpc(
+        'consume_business_creation_limit'
+      )
+
+      if (rateLimitError) {
+        setErr('Business setup is temporarily unavailable. Please try again.')
+        return
+      }
+
+      if (!rateLimitData?.[0]?.allowed) {
+        setErr('Too many setup attempts. Please try again later.')
+        return
+      }
+
       const { data, error } = await supabase
         .from('businesses')
         .insert({ name: businessName.trim(), owner_email: userEmail })

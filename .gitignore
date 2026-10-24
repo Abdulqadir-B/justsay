@@ -61,3 +61,5 @@ supabase/.branches/
 
 EchoReview_Build_Prompt.md
 README.md
+/.agents
+GEMINI_MODELS.MD

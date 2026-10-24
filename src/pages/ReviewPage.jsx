@@ -44,38 +44,68 @@ export default function ReviewPage() {
     setIsSubmitting(true)
     setSubmitError(null)
 
+    const tStart = performance.now()
     try {
-      // Convert blob to base64
-      const arrayBuffer = await audioBlob.arrayBuffer()
-      const uint8Array = new Uint8Array(arrayBuffer)
-      let binary = ''
-      for (let i = 0; i < uint8Array.length; i++) {
-        binary += String.fromCharCode(uint8Array[i])
-      }
-      const audioBase64 = btoa(binary)
+      // Convert blob to base64 using native browser FileReader (fast and non-blocking)
+      const tEncodeStart = performance.now()
+      const audioBase64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          const res = reader.result
+          const base64 = typeof res === 'string' ? res.split(',')[1] : ''
+          resolve(base64)
+        }
+        reader.onerror = () => reject(new Error('Failed to encode audio'))
+        reader.readAsDataURL(audioBlob)
+      })
+      const encodeTimeMs = (performance.now() - tEncodeStart).toFixed(0)
 
       // Call Supabase Edge Function instead of Next.js API route
+      const tCallStart = performance.now()
       const supabase = createClient()
       const { data, error } = await supabase.functions.invoke('process-review', {
         body: { audioBase64, mimeType, businessId },
       })
+      const callTimeSec = ((performance.now() - tCallStart) / 1000).toFixed(2)
+      const totalTimeSec = ((performance.now() - tStart) / 1000).toFixed(2)
+
+      console.log(
+        `[VoiceReview Latency Profile] Total: ${totalTimeSec}s (Client Encode: ${encodeTimeMs}ms, Network+Server: ${callTimeSec}s)`,
+        data?.timings
+      )
 
       if (error || !data?.success) {
-        let errorMsg = data?.error || error?.message
+        let technicalMsg = data?.error || error?.message
         if (error && error.context) {
           try {
             const errBody = await error.context.json()
-            if (errBody?.error) errorMsg = errBody.error
+            if (errBody?.error) technicalMsg = errBody.error
+            if (errBody?.attempts) {
+              console.warn('[VoiceReview] Server model attempts diagnostics:', errBody.attempts)
+            }
           } catch {
             // ignore
           }
         }
-        throw new Error(errorMsg || 'Failed to submit review')
+        console.error('[VoiceReview] Edge function error detail:', technicalMsg, error)
+        throw new Error(technicalMsg || 'Failed to submit review')
       }
 
       setSubmitted(true)
     } catch (err) {
-      setSubmitError(err.message || 'Something went wrong')
+      console.error('[VoiceReview] Submission error:', err)
+      let userFriendlyMessage = "We couldn't process your voice note right now. Please tap 'Try again'."
+      const msg = (err?.message || '').toLowerCase()
+
+      if (msg.includes('business not found')) {
+        userFriendlyMessage = 'This review link is invalid or no longer active.'
+      } else if (msg.includes('too many review submissions')) {
+        userFriendlyMessage = 'Too many submissions from this connection. Please try again later.'
+      } else if (msg.includes('failed to fetch') || msg.includes('network') || msg.includes('load failed')) {
+        userFriendlyMessage = 'Connection issue. Please check your internet and try again.'
+      }
+
+      setSubmitError(userFriendlyMessage)
     } finally {
       setIsSubmitting(false)
     }

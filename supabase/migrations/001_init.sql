@@ -95,6 +95,96 @@ CREATE POLICY "Service role full access to reviews"
 ALTER PUBLICATION supabase_realtime ADD TABLE reviews;
 
 -- ============================================
+-- Rate limiting
+-- ============================================
+
+CREATE TABLE rate_limit_buckets (
+  bucket_key TEXT PRIMARY KEY,
+  window_started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  request_count INT NOT NULL DEFAULT 0
+);
+
+ALTER TABLE rate_limit_buckets ENABLE ROW LEVEL SECURITY;
+
+CREATE OR REPLACE FUNCTION consume_rate_limit(
+  p_bucket_key TEXT,
+  p_limit INT,
+  p_window_seconds INT
+)
+RETURNS TABLE (allowed BOOLEAN, retry_after_seconds INT)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  current_bucket rate_limit_buckets%ROWTYPE;
+  seconds_remaining INT;
+BEGIN
+  INSERT INTO rate_limit_buckets (bucket_key)
+  VALUES (p_bucket_key)
+  ON CONFLICT (bucket_key) DO NOTHING;
+
+  SELECT * INTO current_bucket
+  FROM rate_limit_buckets
+  WHERE bucket_key = p_bucket_key
+  FOR UPDATE;
+
+  IF current_bucket.window_started_at + make_interval(secs => p_window_seconds) <= NOW() THEN
+    UPDATE rate_limit_buckets
+    SET window_started_at = NOW(), request_count = 1
+    WHERE bucket_key = p_bucket_key;
+    RETURN QUERY SELECT TRUE, 0;
+    RETURN;
+  END IF;
+
+  seconds_remaining := GREATEST(
+    1,
+    CEIL(EXTRACT(EPOCH FROM (
+      current_bucket.window_started_at + make_interval(secs => p_window_seconds) - NOW()
+    )))::INT
+  );
+
+  IF current_bucket.request_count >= p_limit THEN
+    RETURN QUERY SELECT FALSE, seconds_remaining;
+    RETURN;
+  END IF;
+
+  UPDATE rate_limit_buckets
+  SET request_count = request_count + 1
+  WHERE bucket_key = p_bucket_key;
+
+  RETURN QUERY SELECT TRUE, 0;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION consume_rate_limit(TEXT, INT, INT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION consume_rate_limit(TEXT, INT, INT) TO service_role;
+
+CREATE OR REPLACE FUNCTION consume_business_creation_limit()
+RETURNS TABLE (allowed BOOLEAN, retry_after_seconds INT)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RETURN QUERY SELECT FALSE, 3600;
+    RETURN;
+  END IF;
+
+  RETURN QUERY
+  SELECT * FROM consume_rate_limit(
+    'business-create:user:' || auth.uid()::TEXT,
+    3,
+    3600
+  );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION consume_business_creation_limit() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION consume_business_creation_limit() TO authenticated;
+
+-- ============================================
 -- Seed Data: Demo Business
 -- ============================================
 INSERT INTO businesses (id, name, owner_email)
