@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { createClient } from '../lib/supabase.js'
 import { Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 import BrandLogo from '../components/BrandLogo.jsx'
@@ -231,6 +231,13 @@ export default function LoginPage() {
             </form>
           )}
         </div>
+
+        <Link
+          to="/"
+          className="mt-5 block text-center text-xs text-zinc-500 transition-colors hover:text-zinc-200"
+        >
+          Back to home
+        </Link>
       </div>
     </div>
   )
