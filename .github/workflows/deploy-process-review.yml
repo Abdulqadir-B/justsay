@@ -19,9 +19,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Supabase CLI
-        uses: supabase/setup-cli@v1
+        uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1
         with:
-          version: latest
+          version: 2.122.0
 
       - name: Deploy Edge Function
         run: supabase functions deploy process-review --project-ref "$SUPABASE_PROJECT_REF"
