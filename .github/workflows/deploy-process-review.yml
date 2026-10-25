@@ -1,6 +1,7 @@
 name: Deploy process-review
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
