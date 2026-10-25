@@ -160,25 +160,34 @@ async function analyzeAudio(audioBase64, mimeType) {
   throw finalError
 }
 
+const PRODUCTION_ORIGIN = 'https://justsay-web.vercel.app'
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
+function getCorsHeaders(origin) {
+  const headers = { ...corsHeaders }
+  if (!origin || origin === PRODUCTION_ORIGIN) {
+    headers['Access-Control-Allow-Origin'] = PRODUCTION_ORIGIN
+  }
+  return headers
+}
+
 Deno.serve(async (req) => {
+  const requestCorsHeaders = getCorsHeaders(req.headers.get('origin'))
+
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: requestCorsHeaders })
   }
 
   try {
-    const serverStart = Date.now()
     const contentLength = Number(req.headers.get('content-length') || 0)
     if (contentLength > MAX_REQUEST_BYTES) {
       return Response.json(
         { success: false, error: 'Audio request is too large. Please record a shorter review.' },
-        { status: 413, headers: corsHeaders }
+        { status: 413, headers: requestCorsHeaders }
       )
     }
 
@@ -186,7 +195,7 @@ Deno.serve(async (req) => {
     if (new TextEncoder().encode(rawBody).byteLength > MAX_REQUEST_BYTES) {
       return Response.json(
         { success: false, error: 'Audio request is too large. Please record a shorter review.' },
-        { status: 413, headers: corsHeaders }
+        { status: 413, headers: requestCorsHeaders }
       )
     }
 
@@ -196,7 +205,7 @@ Deno.serve(async (req) => {
     } catch {
       return Response.json(
         { success: false, error: 'Invalid request body.' },
-        { status: 400, headers: corsHeaders }
+        { status: 400, headers: requestCorsHeaders }
       )
     }
 
@@ -205,7 +214,7 @@ Deno.serve(async (req) => {
     if (!audioBase64 || !mimeType || !businessId) {
       return Response.json(
         { success: false, error: 'Missing required fields: audioBase64, mimeType, businessId' },
-        { status: 400, headers: corsHeaders }
+        { status: 400, headers: requestCorsHeaders }
       )
     }
 
@@ -213,7 +222,7 @@ Deno.serve(async (req) => {
     if (!ALLOWED_AUDIO_TYPES.has(cleanMimeType)) {
       return Response.json(
         { success: false, error: 'Unsupported audio format.' },
-        { status: 415, headers: corsHeaders }
+        { status: 415, headers: requestCorsHeaders }
       )
     }
 
@@ -225,7 +234,7 @@ Deno.serve(async (req) => {
     ) {
       return Response.json(
         { success: false, error: 'Invalid or oversized audio data.' },
-        { status: 400, headers: corsHeaders }
+        { status: 400, headers: requestCorsHeaders }
       )
     }
 
@@ -242,7 +251,7 @@ Deno.serve(async (req) => {
       'consume_rate_limit',
       {
         p_bucket_key: `process-review:${clientIp}`,
-        p_limit: 5,
+        p_limit: 3,
         p_window_seconds: 3600,
       }
     )
@@ -251,7 +260,7 @@ Deno.serve(async (req) => {
       console.error('Rate limiter failed:', rateLimitError)
       return Response.json(
         { success: false, error: 'Review service is temporarily unavailable. Please try again.' },
-        { status: 503, headers: corsHeaders }
+        { status: 503, headers: requestCorsHeaders }
       )
     }
 
@@ -262,7 +271,7 @@ Deno.serve(async (req) => {
         { success: false, error: 'Too many review submissions. Please try again later.' },
         {
           status: 429,
-          headers: { ...corsHeaders, 'Retry-After': String(retryAfter) },
+          headers: { ...requestCorsHeaders, 'Retry-After': String(retryAfter) },
         }
       )
     }
@@ -276,7 +285,7 @@ Deno.serve(async (req) => {
     if (businessError || !business) {
       return Response.json(
         { success: false, error: 'Business not found' },
-        { status: 404, headers: corsHeaders }
+        { status: 404, headers: requestCorsHeaders }
       )
     }
 
@@ -288,10 +297,9 @@ Deno.serve(async (req) => {
       return Response.json(
         {
           success: false,
-          error: error?.message || 'Could not analyze voice note. Please try again.',
-          attempts: error?._attempts || [],
+          error: 'Could not analyze voice note. Please try again.',
         },
-        { status: 502, headers: corsHeaders }
+        { status: 502, headers: requestCorsHeaders }
       )
     }
 
@@ -312,7 +320,7 @@ Deno.serve(async (req) => {
     if (insertError || !review) {
       return Response.json(
         { success: false, error: 'Failed to save review' },
-        { status: 500, headers: corsHeaders }
+        { status: 500, headers: requestCorsHeaders }
       )
     }
 
@@ -320,21 +328,14 @@ Deno.serve(async (req) => {
       {
         success: true,
         reviewId: review.id,
-        timings: {
-          serverTotalMs: Date.now() - serverStart,
-          modelUsed: analysisResult._modelUsed,
-          modelDurationMs: analysisResult._modelDurationMs,
-          totalAiMs: analysisResult._totalAiMs,
-          attempts: analysisResult._attempts,
-          availableModels: cachedModels,
-        },
       },
-      { headers: corsHeaders }
+      { headers: requestCorsHeaders }
     )
   } catch (error) {
+    console.error('Review processing failed:', error)
     return Response.json(
-      { success: false, error: error?.message ?? 'Internal server error' },
-      { status: 500, headers: corsHeaders }
+      { success: false, error: 'Review processing failed. Please try again.' },
+      { status: 500, headers: requestCorsHeaders }
     )
   }
 })
