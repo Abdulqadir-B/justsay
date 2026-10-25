@@ -58,8 +58,5 @@ supabase/.branches/
 # typescript & caches
 .eslintcache
 
-
-EchoReview_Build_Prompt.md
-README.md
 /.agents
 GEMINI_MODELS.MD
