@@ -16,6 +16,13 @@ Rules:
 - Return ONLY valid JSON. No explanation. No markdown.`
 
 const VALID_SENTIMENTS = ['positive', 'neutral', 'negative']
+const MAX_REQUEST_BYTES = 5 * 1024 * 1024
+const MAX_AUDIO_BYTES = 4 * 1024 * 1024
+const ALLOWED_AUDIO_TYPES = new Set(['audio/webm', 'audio/ogg', 'audio/wav', 'audio/mp4'])
+
+function getBase64ByteLength(value) {
+  return Math.floor(value.length * 3 / 4) - (value.endsWith('==') ? 2 : value.endsWith('=') ? 1 : 0)
+}
 
 function validateResult(data) {
   const transcript = typeof data.transcript === 'string' ? data.transcript : '[No speech detected]'
@@ -167,12 +174,57 @@ Deno.serve(async (req) => {
 
   try {
     const serverStart = Date.now()
-    const body = await req.json()
+    const contentLength = Number(req.headers.get('content-length') || 0)
+    if (contentLength > MAX_REQUEST_BYTES) {
+      return Response.json(
+        { success: false, error: 'Audio request is too large. Please record a shorter review.' },
+        { status: 413, headers: corsHeaders }
+      )
+    }
+
+    const rawBody = await req.text()
+    if (new TextEncoder().encode(rawBody).byteLength > MAX_REQUEST_BYTES) {
+      return Response.json(
+        { success: false, error: 'Audio request is too large. Please record a shorter review.' },
+        { status: 413, headers: corsHeaders }
+      )
+    }
+
+    let body
+    try {
+      body = JSON.parse(rawBody)
+    } catch {
+      return Response.json(
+        { success: false, error: 'Invalid request body.' },
+        { status: 400, headers: corsHeaders }
+      )
+    }
+
     const { audioBase64, mimeType, businessId } = body
 
     if (!audioBase64 || !mimeType || !businessId) {
       return Response.json(
         { success: false, error: 'Missing required fields: audioBase64, mimeType, businessId' },
+        { status: 400, headers: corsHeaders }
+      )
+    }
+
+    const cleanMimeType = mimeType.split(';')[0].trim().toLowerCase()
+    if (!ALLOWED_AUDIO_TYPES.has(cleanMimeType)) {
+      return Response.json(
+        { success: false, error: 'Unsupported audio format.' },
+        { status: 415, headers: corsHeaders }
+      )
+    }
+
+    if (
+      typeof audioBase64 !== 'string' ||
+      !/^[A-Za-z0-9+/]*={0,2}$/.test(audioBase64) ||
+      audioBase64.length % 4 !== 0 ||
+      getBase64ByteLength(audioBase64) > MAX_AUDIO_BYTES
+    ) {
+      return Response.json(
+        { success: false, error: 'Invalid or oversized audio data.' },
         { status: 400, headers: corsHeaders }
       )
     }
@@ -215,29 +267,23 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Run business verification and Gemini AI audio analysis concurrently
-    const businessCheckPromise = supabase
+    const { data: business, error: businessError } = await supabase
       .from('businesses')
       .select('id')
       .eq('id', businessId)
       .single()
 
-    const aiAnalysisPromise = analyzeAudio(audioBase64, mimeType)
-
-    const [bizResult, aiResult] = await Promise.allSettled([
-      businessCheckPromise,
-      aiAnalysisPromise,
-    ])
-
-    if (bizResult.status === 'rejected' || bizResult.value.error || !bizResult.value.data) {
+    if (businessError || !business) {
       return Response.json(
         { success: false, error: 'Business not found' },
         { status: 404, headers: corsHeaders }
       )
     }
 
-    if (aiResult.status === 'rejected') {
-      const error = aiResult.reason
+    let analysisResult
+    try {
+      analysisResult = await analyzeAudio(audioBase64, mimeType)
+    } catch (error) {
       console.error('AI processing failed:', error)
       return Response.json(
         {
@@ -248,8 +294,6 @@ Deno.serve(async (req) => {
         { status: 502, headers: corsHeaders }
       )
     }
-
-    const analysisResult = aiResult.value
 
     // Insert review
     const { data: review, error: insertError } = await supabase

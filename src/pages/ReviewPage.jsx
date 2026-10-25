@@ -21,7 +21,7 @@ export default function ReviewPage() {
       try {
         const supabase = createClient()
         const { data, error } = await supabase
-          .from('businesses')
+          .from('public_businesses')
           .select('name')
           .eq('id', businessId)
           .maybeSingle()
