@@ -5,8 +5,7 @@ on:
     branches:
       - main
     paths:
-      - supabase/functions/process-review/**
-  workflow_dispatch:
+      - supabase/functions/process-review/index.ts
 
 permissions:
   contents: read
