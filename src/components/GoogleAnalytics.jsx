@@ -7,9 +7,10 @@ const scriptId = "google-analytics-script";
 function GoogleAnalytics() {
   const location = useLocation();
   const lastPagePath = useRef("");
+  const isReviewPage = location.pathname.startsWith("/review/");
 
   useEffect(() => {
-    if (!measurementId) return;
+    if (!measurementId || isReviewPage) return;
 
     if (!window.gtag) {
       window.dataLayer = window.dataLayer || [];
@@ -28,10 +29,10 @@ function GoogleAnalytics() {
       script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
       document.head.appendChild(script);
     }
-  }, []);
+  }, [isReviewPage]);
 
   useEffect(() => {
-    if (!measurementId || !window.gtag) return;
+    if (!measurementId || isReviewPage || !window.gtag) return;
 
     const pagePath = `${location.pathname}${location.search}`;
     if (lastPagePath.current === pagePath) return;
@@ -42,7 +43,7 @@ function GoogleAnalytics() {
       page_title: document.title,
       page_location: window.location.href,
     });
-  }, [location]);
+  }, [isReviewPage, location]);
 
   return null;
 }

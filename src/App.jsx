@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
 import LandingPage from './pages/LandingPage.jsx'
 import GoogleAnalytics from './components/GoogleAnalytics.jsx'
@@ -19,7 +19,7 @@ function RouteLoading() {
 export default function App() {
   return (
     <BrowserRouter>
-      <GoogleAnalytics />
+      <RouteAnalytics />
       <Suspense fallback={<RouteLoading />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
@@ -28,7 +28,18 @@ export default function App() {
           <Route path="/review/:businessId" element={<ReviewPage />} />
         </Routes>
       </Suspense>
-      <Analytics />
     </BrowserRouter>
+  )
+}
+
+function RouteAnalytics() {
+  const location = useLocation()
+  const isReviewPage = location.pathname.startsWith('/review/')
+
+  return (
+    <>
+      {!isReviewPage && <GoogleAnalytics />}
+      {!isReviewPage && <Analytics />}
+    </>
   )
 }
