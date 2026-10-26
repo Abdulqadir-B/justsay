@@ -1,0 +1,21 @@
+# JustSay
+
+> JustSay helps customer-focused businesses collect short voice reviews and understand customer feedback from a live dashboard.
+
+## Public pages
+
+- [Homepage](https://justsay-web.vercel.app/): Overview of JustSay voice review collection and customer feedback insights.
+
+## Product capabilities
+
+- Shareable review links for individual businesses
+- Short voice review recording
+- Automatic transcription
+- Sentiment classification and scoring
+- Star rating inference
+- Keyword extraction
+- Business dashboard with review statistics and recent feedback
+
+## Private areas
+
+The login, dashboard, and business review routes are application workflows and are not intended as public reference pages.
