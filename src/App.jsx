@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
 import LandingPage from './pages/LandingPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
+import AuthCallbackPage from './pages/AuthCallbackPage.jsx'
 import GoogleAnalytics from './components/GoogleAnalytics.jsx'
 import PageSeo from './components/PageSeo.jsx'
 
@@ -26,6 +27,7 @@ export default function App() {
       <Suspense fallback={<RouteLoading />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/review/:businessId" element={<ReviewPage />} />
