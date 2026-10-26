@@ -1,8 +1,19 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { createClient } from '../lib/supabase.js'
-import { Loader2, CheckCircle2, Eye, EyeOff, Chrome } from 'lucide-react'
+import { Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 import BrandLogo from '../components/BrandLogo.jsx'
+
+function GoogleMark() {
+  return (
+    <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24">
+      <path fill="#EA4335" d="M12 10.2v4.1h5.8c-.25 1.32-1.75 3.87-5.8 3.87A6.17 6.17 0 1 1 12 5.83c2.35 0 3.93 1 4.83 1.85l3.3-3.2C18.02 2.5 15.27 1.3 12 1.3a10.7 10.7 0 1 0 0 21.4c6.18 0 10.3-4.34 10.3-10.45 0-.7-.08-1.23-.17-1.75H12Z" />
+      <path fill="#4285F4" d="M22.3 10.5H12v4.1h5.8c-.28 1.37-1.17 2.53-2.46 3.3l3.53 2.74c2.1-1.94 3.43-4.8 3.43-8.39 0-.7-.08-1.23-.17-1.75Z" />
+      <path fill="#FBBC05" d="M5.05 14.28a6.43 6.43 0 0 1 0-4.56L1.4 6.9a10.7 10.7 0 0 0 0 10.2l3.65-2.82Z" />
+      <path fill="#34A853" d="M12 22.7c3.27 0 6.02-1.08 8.03-2.93l-3.53-2.74c-.98.66-2.23 1.14-4.5 1.14-3.45 0-6.37-2.33-7.42-5.47L.9 15.52A10.7 10.7 0 0 0 12 22.7Z" />
+    </svg>
+  )
+}
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -72,9 +83,15 @@ export default function LoginPage() {
       setError('Passwords do not match.')
       return
     }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.')
-      return
+    if (mode === 'signup') {
+      if (password.length < 6) {
+        setError('Choose a password with at least 6 characters.')
+        return
+      }
+      if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+        setError('Use at least one lowercase letter, one uppercase letter, and one number in your password.')
+        return
+      }
     }
 
     setLoading(true)
@@ -162,9 +179,9 @@ export default function LoginPage() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-700 bg-white py-2.5 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-3 rounded-lg border border-zinc-300 bg-white px-4 py-3 text-sm font-semibold text-zinc-800 shadow-sm transition-colors hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 focus:ring-offset-[#121215] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Chrome className="h-4 w-4" />
+            <GoogleMark />
             Continue with Google
           </button>
 
