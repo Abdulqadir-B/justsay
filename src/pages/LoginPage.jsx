@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { createClient } from '../lib/supabase.js'
-import { Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react'
+import { Loader2, CheckCircle2, Eye, EyeOff, Chrome } from 'lucide-react'
 import BrandLogo from '../components/BrandLogo.jsx'
 
 export default function LoginPage() {
@@ -16,6 +16,19 @@ export default function LoginPage() {
   const [error, setError] = useState(null)
   const [signUpSuccess, setSignUpSuccess] = useState(false)
 
+  useEffect(() => {
+    let active = true
+    const supabase = createClient()
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (active && data.session) navigate('/dashboard', { replace: true })
+    })
+
+    return () => {
+      active = false
+    }
+  }, [navigate])
+
   function switchMode(next) {
     setMode(next)
     setError(null)
@@ -25,6 +38,30 @@ export default function LoginPage() {
     setShowPassword(false)
     setShowConfirmPassword(false)
     setSignUpSuccess(false)
+  }
+
+  async function handleGoogleSignIn() {
+    setError(null)
+    setLoading(true)
+
+    try {
+      const supabase = createClient()
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/login',
+        },
+      })
+
+      if (authError) setError(authError.message)
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error('Google authentication error:', err)
+      }
+      setError(err?.message || 'Unable to continue with Google. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function handleSubmit(e) {
@@ -119,6 +156,22 @@ export default function LoginPage() {
             >
               Sign Up
             </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-700 bg-white py-2.5 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <Chrome className="h-4 w-4" />
+            Continue with Google
+          </button>
+
+          <div className="my-5 flex items-center gap-3 text-[10px] uppercase tracking-wider text-zinc-600">
+            <div className="h-px flex-1 bg-zinc-800" />
+            <span>or use email</span>
+            <div className="h-px flex-1 bg-zinc-800" />
           </div>
 
           {/* Success State */}
