@@ -499,16 +499,16 @@ export default function DashboardPage() {
               </div>
 
               {/* Filters */}
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center">
                 {/* Search Input */}
-                <div className="relative">
+                <div className="relative w-full sm:w-auto">
                   <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-zinc-500" />
                   <input
                     type="text"
                     value={reviewSearch}
                     onChange={(e) => setReviewSearch(e.target.value)}
                     placeholder="Search keywords or text..."
-                    className="w-48 sm:w-60 rounded-lg border border-zinc-800 bg-zinc-900/60 pl-8 pr-7 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 focus:border-zinc-500 focus:outline-none"
+                    className="w-full rounded-lg border border-zinc-800 bg-zinc-900/60 py-1.5 pl-8 pr-7 text-xs text-zinc-200 placeholder-zinc-500 focus:border-zinc-500 focus:outline-none sm:w-60"
                   />
                   {reviewSearch && (
                     <button
@@ -522,12 +522,12 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Sentiment Filter Segment */}
-                <div className="flex items-center gap-1 bg-zinc-900/70 border border-zinc-800 rounded-lg p-0.5 text-xs">
+                <div className="grid w-full grid-cols-4 items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900/70 p-0.5 text-xs sm:w-auto">
                   {['all', 'positive', 'neutral', 'negative'].map((s) => (
                     <button
                       key={s}
                       onClick={() => setSentimentFilter(s)}
-                      className={`px-2.5 py-1 rounded-md text-[11px] font-medium capitalize transition-colors ${
+                        className={`rounded-md px-1.5 py-1 text-[11px] font-medium capitalize transition-colors sm:px-2.5 ${
                         sentimentFilter === s
                           ? 'bg-zinc-800 text-white shadow-sm'
                           : 'text-zinc-400 hover:text-zinc-200'
@@ -543,7 +543,7 @@ export default function DashboardPage() {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="appearance-none rounded-lg border border-zinc-800 bg-zinc-900/70 pl-2.5 pr-7 py-1.5 text-[11px] text-zinc-300 focus:border-zinc-500 focus:outline-none cursor-pointer"
+                    className="w-full cursor-pointer appearance-none rounded-lg border border-zinc-800 bg-zinc-900/70 py-1.5 pl-2.5 pr-7 text-[11px] text-zinc-300 focus:border-zinc-500 focus:outline-none sm:w-auto"
                   >
                     <option value="newest">Newest First</option>
                     <option value="highest_rating">Highest Rated</option>
@@ -637,31 +637,33 @@ export default function DashboardPage() {
                 <label className="block text-xs font-medium text-zinc-400 mb-1.5">
                   Direct Review URL
                 </label>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <input
                     type="text"
                     readOnly
                     value={reviewUrl}
                     className="input-subtle font-mono text-xs flex-1 select-all"
                   />
-                  <button
-                    onClick={handleCopy}
-                    className={`btn-secondary px-3 py-2 text-xs flex items-center gap-1.5 ${
-                      copied ? 'text-emerald-400 border-emerald-500/30' : ''
-                    }`}
-                  >
-                    {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                    <span>{copied ? 'Copied' : 'Copy'}</span>
-                  </button>
-                  <a
-                    href={`${reviewUrl}?preview=true`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-primary px-3 py-2 text-xs flex items-center gap-1.5"
-                  >
-                    <ExternalLink className="h-3.5 w-3.5" />
-                    <span>Open</span>
-                  </a>
+                  <div className="flex gap-2 sm:shrink-0">
+                    <button
+                      onClick={handleCopy}
+                      className={`btn-secondary flex flex-1 items-center justify-center gap-1.5 px-3 py-2 text-xs sm:flex-none ${
+                        copied ? 'text-emerald-400 border-emerald-500/30' : ''
+                      }`}
+                    >
+                      {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                      <span>{copied ? 'Copied' : 'Copy'}</span>
+                    </button>
+                    <a
+                      href={`${reviewUrl}?preview=true`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-primary flex flex-1 items-center justify-center gap-1.5 px-3 py-2 text-xs sm:flex-none"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      <span>Open</span>
+                    </a>
+                  </div>
                 </div>
               </div>
 

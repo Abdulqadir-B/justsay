@@ -50,7 +50,7 @@ export default function ReviewCard({ review, isNew = false, onKeywordClick }) {
       </div>
 
       {/* Transcript */}
-      <p className="mt-3 text-sm leading-relaxed text-zinc-200 font-normal">
+      <p className="mt-3 break-words text-sm font-normal leading-relaxed text-zinc-200">
         &ldquo;{review.transcript}&rdquo;
       </p>
 

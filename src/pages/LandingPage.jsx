@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -8,6 +9,7 @@ import {
   QrCode,
 } from "lucide-react";
 import BrandLogo from "../components/BrandLogo.jsx";
+import { createClient } from "../lib/supabase.js";
 
 const steps = [
   {
@@ -46,14 +48,27 @@ const faqs = [
 ];
 
 export default function LandingPage() {
+  const [isSignedIn, setIsSignedIn] = useState(false)
+
+  useEffect(() => {
+    const supabase = createClient()
+
+    supabase.auth.getUser().then(({ data }) => {
+      setIsSignedIn(Boolean(data.user))
+    })
+  }, [])
+
+  const accountPath = isSignedIn ? "/dashboard" : "/login"
+  const accountLabel = isSignedIn ? "Dashboard" : "Sign in"
+
   return (
     <main className="min-h-screen overflow-hidden bg-zinc-950 text-zinc-100">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
         <Link to="/" className="flex items-center gap-2.5">
           <BrandLogo size="md" />
         </Link>
-        <Link to="/login" className="btn-ghost px-3 py-2 text-xs">
-          Sign in
+        <Link to={accountPath} className="btn-ghost px-3 py-2 text-xs">
+          {accountLabel}
         </Link>
       </nav>
 
@@ -71,8 +86,8 @@ export default function LandingPage() {
             conversation into a clear view of your customer experience.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link to="/login" className="btn-primary gap-2 px-5 py-3">
-              Start collecting reviews
+            <Link to={accountPath} className="btn-primary gap-2 px-5 py-3">
+              {isSignedIn ? "Open dashboard" : "Start collecting reviews"}
               <ArrowRight className="h-4 w-4" />
             </Link>
             <a href="#how-it-works" className="btn-secondary px-5 py-3">

@@ -137,11 +137,11 @@ export default function ReviewPage() {
             The review link you followed doesn&apos;t match any registered business. Please verify the URL.
           </p>
           <Link
-            to="/dashboard"
+            to="/"
             className="mt-3 inline-flex items-center gap-1.5 text-xs text-zinc-300 hover:text-white underline underline-offset-4"
           >
             <ArrowLeft className="h-3 w-3" />
-            Go to Dashboard
+            Back to Home
           </Link>
         </div>
       </div>
