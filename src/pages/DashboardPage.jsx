@@ -214,7 +214,9 @@ export default function DashboardPage() {
           .maybeSingle()
 
         if (bizError) {
-          console.error('Error fetching business:', bizError)
+          if (import.meta.env.DEV) {
+            console.error('Error fetching business:', bizError)
+          }
         }
 
         if (!bizData) {
@@ -234,7 +236,9 @@ export default function DashboardPage() {
 
         setReviews(reviewsData ?? [])
       } catch {
-        console.error('Dashboard load error')
+        if (import.meta.env.DEV) {
+          console.error('Dashboard load error')
+        }
       } finally {
         setLoading(false)
       }

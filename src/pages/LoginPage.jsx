@@ -69,7 +69,9 @@ export default function LoginPage() {
         setSignUpSuccess(true)
       }
     } catch (err) {
-      console.error('Authentication error:', err)
+      if (import.meta.env.DEV) {
+        console.error('Authentication error:', err)
+      }
       setError(err?.message || 'An unexpected error occurred. Please try again.')
     } finally {
       setLoading(false)

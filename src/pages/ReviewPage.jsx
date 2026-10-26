@@ -69,10 +69,12 @@ export default function ReviewPage() {
       const callTimeSec = ((performance.now() - tCallStart) / 1000).toFixed(2)
       const totalTimeSec = ((performance.now() - tStart) / 1000).toFixed(2)
 
-      console.log(
-        `[VoiceReview Latency Profile] Total: ${totalTimeSec}s (Client Encode: ${encodeTimeMs}ms, Network+Server: ${callTimeSec}s)`,
-        data?.timings
-      )
+      if (import.meta.env.DEV) {
+        console.log(
+          `[VoiceReview Latency Profile] Total: ${totalTimeSec}s (Client Encode: ${encodeTimeMs}ms, Network+Server: ${callTimeSec}s)`,
+          data?.timings
+        )
+      }
 
       if (error || !data?.success) {
         let technicalMsg = data?.error || error?.message
@@ -81,19 +83,25 @@ export default function ReviewPage() {
             const errBody = await error.context.json()
             if (errBody?.error) technicalMsg = errBody.error
             if (errBody?.attempts) {
-              console.warn('[VoiceReview] Server model attempts diagnostics:', errBody.attempts)
+              if (import.meta.env.DEV) {
+                console.warn('[VoiceReview] Server model attempts diagnostics:', errBody.attempts)
+              }
             }
           } catch {
             // ignore
           }
         }
-        console.error('[VoiceReview] Edge function error detail:', technicalMsg, error)
+        if (import.meta.env.DEV) {
+          console.error('[VoiceReview] Edge function error detail:', technicalMsg, error)
+        }
         throw new Error(technicalMsg || 'Failed to submit review')
       }
 
       setSubmitted(true)
     } catch (err) {
-      console.error('[VoiceReview] Submission error:', err)
+      if (import.meta.env.DEV) {
+        console.error('[VoiceReview] Submission error:', err)
+      }
       let userFriendlyMessage = "We couldn't process your voice note right now. Please tap 'Try again'."
       const msg = (err?.message || '').toLowerCase()
 
