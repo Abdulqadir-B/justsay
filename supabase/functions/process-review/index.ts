@@ -345,6 +345,15 @@ Deno.serve(async (req) => {
       {
         success: true,
         reviewId: review.id,
+        ...(demo ? {
+          analysis: {
+            transcript: analysisResult.transcript,
+            sentiment: analysisResult.sentiment,
+            sentiment_score: analysisResult.sentiment_score,
+            keywords: analysisResult.keywords,
+            star_rating: analysisResult.star_rating,
+          },
+        } : {}),
       },
       { headers: requestCorsHeaders }
     )

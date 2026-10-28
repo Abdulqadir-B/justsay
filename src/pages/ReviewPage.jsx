@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useSearchParams, Link } from 'react-router-dom'
-import { CheckCircle, AlertCircle, Loader2, ArrowLeft, Eye, ShieldCheck } from 'lucide-react'
+import { CheckCircle, AlertCircle, Loader2, ArrowLeft, Eye, ShieldCheck, Star } from 'lucide-react'
 import VoiceRecorder from '../components/VoiceRecorder.jsx'
+import SentimentBadge from '../components/SentimentBadge.jsx'
 import { createClient } from '../lib/supabase.js'
 
 const DEMO_BUSINESS_ID = '00000000-0000-4000-8000-000000000001'
@@ -17,6 +18,7 @@ export default function ReviewPage({ isDemo = false }) {
   const [notFound, setNotFound] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [analysisResult, setAnalysisResult] = useState(null)
   const [submitError, setSubmitError] = useState(null)
 
   useEffect(() => {
@@ -105,6 +107,9 @@ export default function ReviewPage({ isDemo = false }) {
         throw new Error(technicalMsg || 'Failed to submit review')
       }
 
+      if (isDemo) {
+        setAnalysisResult(data.analysis)
+      }
       setSubmitted(true)
     } catch (err) {
       if (import.meta.env.DEV) {
@@ -157,6 +162,83 @@ export default function ReviewPage({ isDemo = false }) {
   }
 
   if (submitted) {
+    if (isDemo && analysisResult) {
+      const scorePercent = Math.round((analysisResult.sentiment_score ?? 0) * 100)
+
+      return (
+        <div className="min-h-screen bg-zinc-950 px-4 py-10 text-zinc-100 sm:py-16">
+          <main className="mx-auto flex w-full max-w-lg flex-col gap-6">
+            <div className="text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-emerald-500/20 bg-emerald-500/10">
+                <CheckCircle className="h-6 w-6 text-emerald-400" />
+              </div>
+              <p className="mt-5 text-xs font-medium uppercase tracking-[0.2em] text-emerald-400">Your JustSay result</p>
+              <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Here&apos;s what JustSay understood</h1>
+              <p className="mt-2 text-sm leading-6 text-zinc-400">Your voice was turned into structured customer insight in seconds.</p>
+            </div>
+
+            <section className="rounded-2xl border border-zinc-800/90 bg-[#121215] p-5 shadow-xl sm:p-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <SentimentBadge sentiment={analysisResult.sentiment} />
+                <div className="flex items-center gap-1" aria-label={`${analysisResult.star_rating} out of 5 stars`}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`h-4 w-4 ${star <= analysisResult.star_rating ? 'fill-amber-400 text-amber-400' : 'text-zinc-700'}`}
+                    />
+                  ))}
+                  <span className="ml-1 text-xs text-zinc-500">{analysisResult.star_rating}/5</span>
+                </div>
+              </div>
+
+              <blockquote className="mt-5 border-l-2 border-emerald-400/50 pl-4 text-sm leading-7 text-zinc-200">
+                &ldquo;{analysisResult.transcript}&rdquo;
+              </blockquote>
+
+              <div className="mt-5 grid grid-cols-2 gap-3 border-t border-zinc-800/80 pt-5">
+                <div>
+                  <p className="text-xs text-zinc-500">Sentiment match</p>
+                  <p className="mt-1 text-lg font-semibold text-white">{scorePercent}%</p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-500">Key themes</p>
+                  <div className="mt-1 flex flex-wrap gap-1.5">
+                    {analysisResult.keywords?.length > 0
+                      ? analysisResult.keywords.map((keyword) => (
+                        <span key={keyword} className="rounded-md border border-zinc-800 bg-zinc-900 px-2 py-1 text-xs text-zinc-300">
+                          {keyword}
+                        </span>
+                      ))
+                      : <span className="text-sm text-zinc-400">None detected</span>}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <button
+                onClick={() => {
+                  setAnalysisResult(null)
+                  setSubmitted(false)
+                }}
+                className="btn-secondary px-5 py-3"
+              >
+                Try another review
+              </button>
+              <Link to="/login" className="btn-primary px-5 py-3">
+                Create your review link
+              </Link>
+            </div>
+
+            <Link to="/" className="mx-auto inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300">
+              <ArrowLeft className="h-3 w-3" />
+              Back to JustSay
+            </Link>
+          </main>
+        </div>
+      )
+    }
+
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-4">
         <div className="flex flex-col items-center gap-5 text-center animate-fade-in max-w-sm rounded-xl border border-zinc-800 bg-[#121215] p-8 shadow-xl">
