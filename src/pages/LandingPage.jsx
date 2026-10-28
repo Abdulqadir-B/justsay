@@ -90,6 +90,10 @@ export default function LandingPage() {
               {isSignedIn ? "Open dashboard" : "Start collecting reviews"}
               <ArrowRight className="h-4 w-4" />
             </Link>
+            <Link to="/demo" className="btn-secondary gap-2 px-5 py-3">
+              <Mic className="h-4 w-4 text-emerald-400" />
+              Try a voice review
+            </Link>
             <a href="#how-it-works" className="btn-secondary px-5 py-3">
               See how it works
             </a>

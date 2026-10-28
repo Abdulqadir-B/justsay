@@ -19,6 +19,7 @@ const VALID_SENTIMENTS = ['positive', 'neutral', 'negative']
 const MAX_REQUEST_BYTES = 5 * 1024 * 1024
 const MAX_AUDIO_BYTES = 4 * 1024 * 1024
 const ALLOWED_AUDIO_TYPES = new Set(['audio/webm', 'audio/ogg', 'audio/wav', 'audio/mp4'])
+const DEMO_BUSINESS_ID = '00000000-0000-4000-8000-000000000001'
 
 function getBase64ByteLength(value) {
   return Math.floor(value.length * 3 / 4) - (value.endsWith('==') ? 2 : value.endsWith('=') ? 1 : 0)
@@ -218,11 +219,18 @@ Deno.serve(async (req) => {
       )
     }
 
-    const { audioBase64, mimeType, businessId } = body
+    const { audioBase64, mimeType, businessId, demo = false } = body
 
     if (!audioBase64 || !mimeType || !businessId) {
       return Response.json(
         { success: false, error: 'Missing required fields: audioBase64, mimeType, businessId' },
+        { status: 400, headers: requestCorsHeaders }
+      )
+    }
+
+    if (demo && businessId !== DEMO_BUSINESS_ID) {
+      return Response.json(
+        { success: false, error: 'Invalid demo business.' },
         { status: 400, headers: requestCorsHeaders }
       )
     }
@@ -259,8 +267,8 @@ Deno.serve(async (req) => {
     const { data: rateLimitData, error: rateLimitError } = await supabase.rpc(
       'consume_rate_limit',
       {
-        p_bucket_key: `process-review:${clientIp}`,
-        p_limit: 3,
+        p_bucket_key: `${demo ? 'process-demo' : 'process-review'}:${clientIp}`,
+        p_limit: demo ? 2 : 3,
         p_window_seconds: 3600,
       }
     )

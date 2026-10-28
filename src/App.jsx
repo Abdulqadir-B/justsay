@@ -30,6 +30,7 @@ export default function App() {
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/demo" element={<ReviewPage isDemo />} />
           <Route path="/review/:businessId" element={<ReviewPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
@@ -75,6 +76,16 @@ function RouteSeo() {
       <PageSeo
         title="Leave a Voice Review | JustSay"
         description="Share quick voice feedback with this business through JustSay."
+        noindex
+      />
+    )
+  }
+
+  if (pathname === '/demo') {
+    return (
+      <PageSeo
+        title="Try a Voice Review | JustSay"
+        description="Try JustSay's voice review experience without creating an account."
         noindex
       />
     )

@@ -4,10 +4,13 @@ import { CheckCircle, AlertCircle, Loader2, ArrowLeft, Eye, ShieldCheck } from '
 import VoiceRecorder from '../components/VoiceRecorder.jsx'
 import { createClient } from '../lib/supabase.js'
 
-export default function ReviewPage() {
+const DEMO_BUSINESS_ID = '00000000-0000-4000-8000-000000000001'
+
+export default function ReviewPage({ isDemo = false }) {
   const { businessId } = useParams()
   const [searchParams] = useSearchParams()
   const isPreview = searchParams.get('preview') === 'true'
+  const resolvedBusinessId = isDemo ? DEMO_BUSINESS_ID : businessId
 
   const [businessName, setBusinessName] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -23,7 +26,7 @@ export default function ReviewPage() {
         const { data, error } = await supabase
           .from('public_businesses')
           .select('name')
-          .eq('id', businessId)
+          .eq('id', resolvedBusinessId)
           .maybeSingle()
 
         if (error || !data) {
@@ -38,7 +41,7 @@ export default function ReviewPage() {
       }
     }
     fetchBusiness()
-  }, [businessId])
+  }, [resolvedBusinessId])
 
   const handleSubmit = useCallback(async (audioBlob, mimeType) => {
     setIsSubmitting(true)
@@ -64,7 +67,12 @@ export default function ReviewPage() {
       const tCallStart = performance.now()
       const supabase = createClient()
       const { data, error } = await supabase.functions.invoke('process-review', {
-        body: { audioBase64, mimeType, businessId },
+        body: {
+          audioBase64,
+          mimeType,
+          businessId: resolvedBusinessId,
+          demo: isDemo,
+        },
       })
       const callTimeSec = ((performance.now() - tCallStart) / 1000).toFixed(2)
       const totalTimeSec = ((performance.now() - tStart) / 1000).toFixed(2)
@@ -117,7 +125,7 @@ export default function ReviewPage() {
     } finally {
       setIsSubmitting(false)
     }
-  }, [businessId])
+  }, [isDemo, resolvedBusinessId])
 
   if (loading) {
     return (
@@ -158,7 +166,9 @@ export default function ReviewPage() {
           <div>
             <h1 className="text-xl font-semibold text-white">Thank you!</h1>
             <p className="mt-1.5 text-xs text-zinc-400 leading-relaxed">
-              Your feedback was recorded for <span className="font-medium text-zinc-200">{businessName}</span>.
+              {isDemo
+                ? 'You just experienced how a customer leaves feedback with JustSay.'
+                : <>Your feedback was recorded for <span className="font-medium text-zinc-200">{businessName}</span>.</>}
             </p>
           </div>
           <div className="flex items-center gap-2 pt-2">
@@ -168,6 +178,17 @@ export default function ReviewPage() {
             >
               Record another
             </button>
+            {isDemo && (
+              <>
+                <span className="text-zinc-600">&bull;</span>
+                <Link
+                  to="/login"
+                  className="text-xs text-zinc-300 hover:text-white underline"
+                >
+                  Create your review link
+                </Link>
+              </>
+            )}
             {isPreview && (
               <>
                 <span className="text-zinc-600">&bull;</span>
@@ -214,13 +235,15 @@ export default function ReviewPage() {
           <div className="space-y-2.5">
             <div className="inline-flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900/70 px-3 py-1 text-xs text-zinc-400">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-              <span>Verified Business</span>
+              <span>{isDemo ? 'JustSay Demo' : 'Verified Business'}</span>
             </div>
             <h1 className="text-2xl font-semibold tracking-tight text-white">
-              Leave a voice review for <span className="text-zinc-100 underline decoration-zinc-700 underline-offset-4">{businessName}</span>
+              {isDemo ? 'Try a voice review with JustSay' : <>Leave a voice review for <span className="text-zinc-100 underline decoration-zinc-700 underline-offset-4">{businessName}</span></>}
             </h1>
             <p className="text-xs text-zinc-400">
-              Tap the microphone and speak for up to 15 seconds.
+              {isDemo
+                ? 'Record a quick message to see how JustSay turns voice feedback into useful insight.'
+                : 'Tap the microphone and speak for up to 15 seconds.'}
             </p>
           </div>
 
