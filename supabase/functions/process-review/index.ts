@@ -160,20 +160,38 @@ async function analyzeAudio(audioBase64, mimeType) {
   throw finalError
 }
 
-const ALLOWED_ORIGINS = new Set([
-  'https://justsay-web.vercel.app',
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-])
+const ALLOWED_HOSTS = [
+  'localhost',
+  '127.0.0.1',
+  'justsay-web.vercel.app',
+]
 const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Vary': 'Origin',
 }
 
+function isAllowedOrigin(origin) {
+  if (!origin) return false
+
+  try {
+    const { hostname, protocol, port } = new URL(origin)
+
+    if (protocol !== 'http:' && protocol !== 'https:') return false
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return ['http:', 'https:'].includes(protocol) && (port === '' || port === '5173')
+    }
+
+    if (hostname.endsWith('.vercel.app')) return true
+    return hostname === 'justsay-web.vercel.app'
+  } catch {
+    return false
+  }
+}
+
 function getCorsHeaders(origin) {
   const headers = { ...corsHeaders }
-  if (origin && ALLOWED_ORIGINS.has(origin)) {
+  if (origin && isAllowedOrigin(origin)) {
     headers['Access-Control-Allow-Origin'] = origin
   }
   return headers
