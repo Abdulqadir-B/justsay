@@ -33,4 +33,3 @@ JustSay helps customer-focused businesses collect short voice reviews and unders
 - Add export options for reviews and dashboard data
 - Add configurable review length and collection settings
 - Add more detailed trend and theme analysis
-

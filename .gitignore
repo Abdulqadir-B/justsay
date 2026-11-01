@@ -59,6 +59,6 @@ supabase/.branches/
 .eslintcache
 
 /.agents
-GEMINI_MODELS.MD
+GEMINI_MODELS.md
 public/justsay-logo.png
 lighthouse-report.json
