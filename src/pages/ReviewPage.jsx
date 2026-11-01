@@ -80,10 +80,12 @@ export default function ReviewPage({ isDemo = false }) {
       const totalTimeSec = ((performance.now() - tStart) / 1000).toFixed(2)
 
       if (import.meta.env.DEV) {
-        console.log(
-          `[VoiceReview Latency Profile] Total: ${totalTimeSec}s (Client Encode: ${encodeTimeMs}ms, Network+Server: ${callTimeSec}s)`,
-          data?.timings
-        )
+        const latencyMessage =
+          `[VoiceReview Latency Profile] Total: ${totalTimeSec}s (Client Encode: ${encodeTimeMs}ms, Network+Server: ${callTimeSec}s)`
+        console.log(latencyMessage)
+        if (data?.timings) {
+          console.log('[VoiceReview Server Timings]', data.timings)
+        }
       }
 
       if (error || !data?.success) {

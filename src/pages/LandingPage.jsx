@@ -38,7 +38,7 @@ const faqs = [
   {
     question: "How long can a review be?",
     answer:
-      "JustSay is designed for focused five-second voice reviews that are easy for customers to leave and easy for businesses to review.",
+      "JustSay is designed for focused 15-second voice reviews that are easy for customers to leave and easy for businesses to review.",
   },
   {
     question: "What can I see in the business dashboard?",
