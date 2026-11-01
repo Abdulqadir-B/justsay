@@ -61,3 +61,4 @@ supabase/.branches/
 /.agents
 GEMINI_MODELS.MD
 public/justsay-logo.png
+lighthouse-report.json

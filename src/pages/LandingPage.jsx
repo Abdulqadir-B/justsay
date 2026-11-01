@@ -108,12 +108,12 @@ export default function LandingPage() {
             <article key={title} className="border-t border-zinc-800 pt-5">
               <div className="mb-5 flex items-center justify-between">
                 <Icon className="h-5 w-5 text-emerald-400" />
-                <span className="font-mono text-xs text-zinc-600">
+                <span className="font-mono text-xs text-zinc-400">
                   0{index + 1}
                 </span>
               </div>
               <h2 className="text-sm font-medium text-zinc-100">{title}</h2>
-              <p className="mt-2 max-w-xs text-sm leading-6 text-zinc-500">
+              <p className="mt-2 max-w-xs text-sm leading-6 text-zinc-400">
                 {text}
               </p>
             </article>
@@ -128,7 +128,7 @@ export default function LandingPage() {
             <h2 className="mt-4 max-w-md text-3xl font-semibold tracking-tight text-white sm:text-4xl">
               Better customer feedback starts with less friction.
             </h2>
-            <p className="mt-5 max-w-md text-sm leading-7 text-zinc-500 sm:text-base">
+            <p className="mt-5 max-w-md text-sm leading-7 text-zinc-400 sm:text-base">
               JustSay gives businesses a simple way to collect authentic customer
               feedback and spot patterns without asking people to write a long survey.
             </p>
@@ -139,11 +139,11 @@ export default function LandingPage() {
               <details key={question} className="group py-5 first:pt-0 last:pb-0">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-sm font-medium text-zinc-200 marker:hidden">
                   {question}
-                  <span className="text-lg font-light text-zinc-500 transition-transform group-open:rotate-45">
+                  <span className="text-lg font-light text-zinc-400 transition-transform group-open:rotate-45">
                     +
                   </span>
                 </summary>
-                <p className="mt-3 max-w-xl pr-8 text-sm leading-6 text-zinc-500">
+                <p className="mt-3 max-w-xl pr-8 text-sm leading-6 text-zinc-400">
                   {answer}
                 </p>
               </details>
@@ -154,7 +154,7 @@ export default function LandingPage() {
 
       <footer className="border-t border-zinc-900 px-5 py-8 sm:px-8">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 text-xs sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-zinc-500">
+          <p className="text-zinc-400">
             Built by <span className="font-medium text-zinc-300">Abdul Qadir Bearingwala</span>
           </p>
           <div className="flex flex-wrap items-center gap-4">
@@ -162,14 +162,14 @@ export default function LandingPage() {
               href="https://linkedin.com/in/abdulqadir-bearingwala"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 text-zinc-500 transition-colors hover:text-zinc-200"
+              className="inline-flex items-center gap-1.5 text-zinc-400 transition-colors hover:text-zinc-200"
             >
               <Linkedin className="h-3.5 w-3.5" />
               LinkedIn
             </a>
             <a
               href="mailto:abdulqadirworkstudio@gmail.com"
-              className="inline-flex items-center gap-1.5 text-zinc-500 transition-colors hover:text-zinc-200"
+              className="inline-flex items-center gap-1.5 text-zinc-400 transition-colors hover:text-zinc-200"
             >
               <Mail className="h-3.5 w-3.5" />
               Contact
