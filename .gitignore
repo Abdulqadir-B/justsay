@@ -58,7 +58,8 @@ supabase/.branches/
 # typescript & caches
 .eslintcache
 
-/.agents
+.agents
 GEMINI_MODELS.md
 public/justsay-logo.png
 lighthouse-report.json
+ARCHITECTURE.md
