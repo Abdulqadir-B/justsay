@@ -1,11 +1,57 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
-  <title id="title">JustSay voice reviews</title>
-  <desc id="description">Collect quick voice reviews and understand customer feedback.</desc>
-  <rect width="1200" height="630" fill="#09090b" />
-  <circle cx="1010" cy="80" r="250" fill="#10b981" opacity="0.09" />
-  <rect x="90" y="92" width="72" height="72" rx="16" fill="#18181b" stroke="#3f3f46" />
-  <path d="M112 126v18M120 117v36M128 112v46M136 120v38M144 126v18" fill="none" stroke="#34d399" stroke-width="5" stroke-linecap="round" />
-  <text x="90" y="270" fill="#ffffff" font-family="Arial, sans-serif" font-size="72" font-weight="700">JustSay</text>
-  <text x="90" y="350" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="34">Voice reviews for better customer feedback.</text>
-  <text x="90" y="480" fill="#34d399" font-family="Arial, sans-serif" font-size="22" letter-spacing="4">LISTEN. UNDERSTAND. IMPROVE.</text>
+  <title id="title">JustSay turns voice reviews into customer insight</title>
+  <desc id="description">A JustSay review card showing a customer transcript, voice waveform, sentiment, and themes.</desc>
+  <rect width="1200" height="630" fill="#09090b"/>
+  <circle cx="1120" cy="40" r="260" fill="#10b981" opacity=".08"/>
+
+  <g transform="translate(82 82)">
+    <rect x=".5" y=".5" width="31" height="31" rx="8" fill="#18181b" stroke="#27272a"/>
+    <g transform="translate(8 8) scale(.666667)" fill="none" stroke="#f4f4f5" stroke-width="2" stroke-linecap="round">
+      <path d="M2 10v3"/>
+      <path d="M6 6v11"/>
+      <path d="M10 3v18"/>
+      <path d="M14 8v7"/>
+      <path d="M18 5v13"/>
+      <path d="M22 10v3"/>
+    </g>
+    <text x="44" y="22" fill="#fff" font-family="Arial, sans-serif" font-size="18" font-weight="600">JustSay</text>
+
+    <text y="143" fill="#fff" font-family="Arial, sans-serif" font-size="52" font-weight="700">Hear what customers</text>
+    <text y="200" fill="#fff" font-family="Arial, sans-serif" font-size="52" font-weight="700">actually mean.</text>
+    <text y="245" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="22">Voice reviews, turned into clear customer insight.</text>
+  </g>
+
+  <g transform="translate(700 72)">
+    <rect width="418" height="455" rx="18" fill="#121215" stroke="#27272a"/>
+    <text x="28" y="43" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="13">LATEST VOICE REVIEW</text>
+    <rect x="28" y="66" width="362" height="70" rx="12" fill="#18181b"/>
+    <circle cx="58" cy="101" r="17" fill="#064e3b"/>
+    <g transform="translate(52 95) scale(.5)" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round">
+      <path d="M2 10v3"/>
+      <path d="M6 6v11"/>
+      <path d="M10 3v18"/>
+      <path d="M14 8v7"/>
+      <path d="M18 5v13"/>
+      <path d="M22 10v3"/>
+    </g>
+    <text x="88" y="95" fill="#e4e4e7" font-family="Arial, sans-serif" font-size="14">Customer voice note</text>
+    <text x="88" y="117" fill="#71717a" font-family="Arial, sans-serif" font-size="12">00:15  ·  Just now</text>
+
+    <text x="28" y="177" fill="#e4e4e7" font-family="Arial, sans-serif" font-size="16">“The service was quick and the team</text>
+    <text x="28" y="202" fill="#e4e4e7" font-family="Arial, sans-serif" font-size="16">made the whole experience feel easy.”</text>
+
+    <rect x="28" y="232" width="93" height="28" rx="14" fill="#064e3b"/>
+    <text x="44" y="251" fill="#6ee7b7" font-family="Arial, sans-serif" font-size="12" font-weight="700">POSITIVE</text>
+    <text x="140" y="251" fill="#fbbf24" font-family="Arial, sans-serif" font-size="14">★★★★★</text>
+
+    <line x1="28" y1="290" x2="390" y2="290" stroke="#27272a"/>
+    <text x="28" y="321" fill="#71717a" font-family="Arial, sans-serif" font-size="12">THEMES</text>
+    <rect x="28" y="340" width="86" height="29" rx="8" fill="#18181b" stroke="#3f3f46"/>
+    <text x="44" y="359" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="12">#service</text>
+    <rect x="124" y="340" width="86" height="29" rx="8" fill="#18181b" stroke="#3f3f46"/>
+    <text x="140" y="359" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="12">#friendly</text>
+    <rect x="220" y="340" width="80" height="29" rx="8" fill="#18181b" stroke="#3f3f46"/>
+    <text x="236" y="359" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="12">#quick</text>
+    <text x="28" y="414" fill="#34d399" font-family="Arial, sans-serif" font-size="13" font-weight="700">JUSTSAY  /  CUSTOMER SIGNAL</text>
+  </g>
 </svg>
