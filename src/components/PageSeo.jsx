@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 const SITE_URL = 'https://justsay-web.vercel.app'
-const SOCIAL_IMAGE = `${SITE_URL}/og-image.svg`
+const SOCIAL_IMAGE = `${SITE_URL}/og-image.png?v=3`
 
 function setMeta(name, content) {
   let element = document.head.querySelector(`meta[name="${name}"]`)
