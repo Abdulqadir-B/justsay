@@ -58,8 +58,10 @@ supabase/.branches/
 # typescript & caches
 .eslintcache
 
-.agents
-GEMINI_MODELS.md
+# local docs
+/gemini-models.md
 public/justsay-logo.png
 lighthouse-report.json
 ARCHITECTURE.md
+.github/copilot-instructions.md
+/.github/prompts/
