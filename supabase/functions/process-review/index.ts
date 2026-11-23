@@ -20,6 +20,7 @@ const MAX_REQUEST_BYTES = 5 * 1024 * 1024
 const MAX_AUDIO_BYTES = 4 * 1024 * 1024
 const ALLOWED_AUDIO_TYPES = new Set(['audio/webm', 'audio/ogg', 'audio/wav', 'audio/mp4'])
 const DEMO_BUSINESS_ID = '00000000-0000-4000-8000-000000000001'
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 function getBase64ByteLength(value) {
   return Math.floor(value.length * 3 / 4) - (value.endsWith('==') ? 2 : value.endsWith('=') ? 1 : 0)
@@ -219,11 +220,32 @@ Deno.serve(async (req) => {
       )
     }
 
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return Response.json(
+        { success: false, error: 'Invalid request body.' },
+        { status: 400, headers: requestCorsHeaders }
+      )
+    }
+
     const { audioBase64, mimeType, businessId, demo = false } = body
 
-    if (!audioBase64 || !mimeType || !businessId) {
+    if (
+      typeof audioBase64 !== 'string' ||
+      typeof mimeType !== 'string' ||
+      typeof businessId !== 'string' ||
+      !audioBase64 ||
+      !mimeType ||
+      !businessId
+    ) {
       return Response.json(
         { success: false, error: 'Missing required fields: audioBase64, mimeType, businessId' },
+        { status: 400, headers: requestCorsHeaders }
+      )
+    }
+
+    if (!UUID_PATTERN.test(businessId) || typeof demo !== 'boolean') {
+      return Response.json(
+        { success: false, error: 'Invalid review request.' },
         { status: 400, headers: requestCorsHeaders }
       )
     }

@@ -133,7 +133,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-12">
+    <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-12">
       <div className="w-full max-w-sm">
 
         {/* Logo */}
@@ -313,6 +313,6 @@ export default function LoginPage() {
           Back to home
         </Link>
       </div>
-    </div>
+    </main>
   )
 }

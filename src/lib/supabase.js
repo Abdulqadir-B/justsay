@@ -9,6 +9,11 @@ let supabaseInstance = null
 
 export function createClient() {
   if (!supabaseInstance) {
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error(
+        'Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.'
+      )
+    }
     supabaseInstance = createSupabaseClient(supabaseUrl, supabaseKey)
   }
   return supabaseInstance

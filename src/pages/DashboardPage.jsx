@@ -91,7 +91,11 @@ function OnboardingCard({ userEmail, onCreated }) {
 
   async function handleCreate(e) {
     e.preventDefault()
-    if (!businessName.trim()) return
+    const cleanBusinessName = businessName.trim()
+    if (!cleanBusinessName || cleanBusinessName.length > 120) {
+      setErr('Enter a business name between 1 and 120 characters.')
+      return
+    }
     setSaving(true)
     setErr(null)
     try {
@@ -112,10 +116,13 @@ function OnboardingCard({ userEmail, onCreated }) {
 
       const { data, error } = await supabase
         .from('businesses')
-        .insert({ name: businessName.trim(), owner_email: userEmail })
+        .insert({ name: cleanBusinessName, owner_email: userEmail })
         .select()
         .single()
-      if (error) { setErr(error.message); return }
+      if (error) {
+        setErr('Unable to create the business profile. Please try again.')
+        return
+      }
       onCreated(data)
     } catch {
       setErr('Something went wrong. Please try again.')
@@ -147,6 +154,7 @@ function OnboardingCard({ userEmail, onCreated }) {
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
                 placeholder="e.g. Acme Coffee Co."
+                maxLength={120}
                 required
                 autoFocus
                 className="input-subtle"

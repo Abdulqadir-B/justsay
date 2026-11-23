@@ -21,11 +21,11 @@ export default function AuthCallbackPage() {
   }, [navigate])
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-sm text-zinc-400">
+    <main className="flex min-h-screen items-center justify-center bg-zinc-950 text-sm text-zinc-400">
       <span className="flex items-center gap-2">
         <Loader2 className="h-4 w-4 animate-spin" />
         Signing you in...
       </span>
-    </div>
+    </main>
   )
 }
